@@ -1,3 +1,5 @@
+export default function handler(req, res) {
+  const html = `
 <!doctype html>
 <html lang="es">
 <head>
@@ -400,3 +402,8 @@
 </body>
 </html>
 
+`;
+
+  res.setHeader("Content-Type", "text/html; charset=utf-8");
+  res.status(200).send(html);
+}
