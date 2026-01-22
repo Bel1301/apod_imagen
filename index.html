@@ -156,7 +156,7 @@
   .figure iframe{
     height: 260px;     /* más chico en celular */
   }
-
+ }
 
     .copy p{
       margin:0;
@@ -351,6 +351,16 @@ function toEmbedUrl(u){
       if (id) return `https://www.youtube.com/embed/${id}`;
     }
 
+    // Vimeo vimeo.com/ID -> player.vimeo.com/video/ID
+    if (url.hostname.includes('vimeo.com')) {
+      // soporta vimeo.com/123456 o www.vimeo.com/123456
+      const parts = url.pathname.split('/').filter(Boolean);
+      const id = parts[0];
+      if (id && /^\d+$/.test(id)) return `https://player.vimeo.com/video/${id}`;
+      // si ya viene player.vimeo.com/video/ID, lo dejamos
+      if (url.hostname.includes('player.vimeo.com')) return u;
+    }
+
     return u;
   } catch {
     return u;
@@ -363,11 +373,14 @@ function toEmbedUrl(u){
   mediaBox.innerHTML = '';
 
   if (ORIGINAL.media_type === 'video') {
-    const iframe = document.createElement('iframe');
-    iframe.src = toEmbedUrl(ORIGINAL.url);
-    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-    iframe.allowFullscreen = true;
-    mediaBox.appendChild(iframe);
+   const iframe = document.createElement('iframe');
+iframe.src = toEmbedUrl(ORIGINAL.url);
+iframe.title = ORIGINAL.title || 'APOD video';
+iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+iframe.allowFullscreen = true;
+mediaBox.appendChild(iframe);
+
   } else {
     const img = document.createElement('img');
     img.src = ORIGINAL.hdurl || ORIGINAL.url;
