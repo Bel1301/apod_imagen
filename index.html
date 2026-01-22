@@ -144,19 +144,19 @@
       display:block;
     }
 
-    .figure iframe{
-      width:100%;
-      aspect-ratio:16/9;
-      border:0;
-      display:block;
-    }
+ 
+.figure iframe{
+  width:100%;
+  height: 520px;       /* para que se vea bien en desktop */
+  border:0;
+  display:block;
+}
 
-    .copy{
-      border:1px solid var(--border);
-      border-radius:14px;
-      padding:16px;
-      background: rgba(255,255,255,.45);
-    }
+@media (max-width: 900px){
+  .figure iframe{
+    height: 260px;     /* más chico en celular */
+  }
+
 
     .copy p{
       margin:0;
@@ -368,17 +368,6 @@ function toEmbedUrl(u){
     iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
     iframe.allowFullscreen = true;
     mediaBox.appendChild(iframe);
-
-    // fallback por si el proveedor bloquea el embed
-    const fallback = document.createElement('div');
-    fallback.style.padding = '10px';
-    fallback.style.fontSize = '12px';
-    fallback.style.opacity = '0.85';
-    fallback.innerHTML = (LANG === 'es')
-      ? `Si el video no carga, abrilo acá: <a href="${ORIGINAL.url}" target="_blank" rel="noopener">Ver video</a>`
-      : `If the video doesn't load, open it here: <a href="${ORIGINAL.url}" target="_blank" rel="noopener">Open video</a>`;
-    mediaBox.appendChild(fallback);
-
   } else {
     const img = document.createElement('img');
     img.src = ORIGINAL.hdurl || ORIGINAL.url;
@@ -386,6 +375,7 @@ function toEmbedUrl(u){
     mediaBox.appendChild(img);
   }
 }
+
 
     async function renderText(){
       if (!ORIGINAL) return;
