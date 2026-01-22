@@ -47,38 +47,38 @@
     }
 
     .flagBtn{
-      width:38px; height:38px;
-      border-radius:999px;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.55);
-      cursor:pointer;
-      font-size:18px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      transition: transform .08s ease;
-      user-select:none;
-    }
-    .flagBtn:active{ transform: scale(.98); }
-    .flagBtn.active{
-      outline:2px solid rgba(139,107,61,.35);
-      border-color: rgba(139,107,61,.55);
-    }
+  width:38px; height:38px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background: rgba(255,255,255,.55);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+}
+.flagBtn img{
+  width:20px;
+  height:14px;
+  border-radius:3px;
+  display:block;
+}
 
-   .badge{
-  font-size:12px; color:var(--muted);
+
+.badge{
   border:1px solid var(--border);
   padding:10px 12px;
   border-radius:999px;
   background: rgba(255,255,255,.55);
-
-  /* clave: que se ajuste al contenido */
-  display:inline-block;
   width: fit-content;
   min-width: unset;
-
-  text-align:left;  /* queda más prolijo */
 }
+
+.badgeTop{
+  text-align:center;      /* centra “Fecha: …” */
+  width:100%;
+}
+
 
 
     .badgeRow{
@@ -207,18 +207,31 @@
 
       <div class="rightTop">
         <div class="langToggle" aria-label="Cambiar idioma">
-          <button id="btnES" class="flagBtn" title="Español" onclick="setLang('es')">🇪🇸</button>
-          <button id="btnEN" class="flagBtn" title="English" onclick="setLang('en')">🇺🇸</button>
+         <button id="btnES" class="flagBtn" title="Español" onclick="setLang('es')">
+  <img alt="ES" src="https://flagcdn.com/w20/es.png">
+</button>
+
+<button id="btnEN" class="flagBtn" title="English" onclick="setLang('en')">
+  <img alt="US" src="https://flagcdn.com/w20/us.png">
+</button>
+
 
         </div>
 
         <div class="badge">
-          <span id="labelDate">Fecha</span>: <b id="dateText">—</b>
-          <div class="badgeRow">
-            <input id="d" class="dateInput" type="date">
-            <button class="dateBtn" onclick="go()" id="btnView">Ver</button>
-          </div>
-          <div id="err" class="error"></div>
+  <div class="badgeTop">
+    <span id="labelDate">Fecha</span>: <b id="dateText">—</b>
+  </div>
+
+  <div class="badgeRow">
+    <input id="d" class="dateInput" type="date">
+    <button class="dateBtn" onclick="go()" id="btnView">Ver</button>
+  </div>
+
+  <div id="err" class="error"></div>
+  
+</div>
+
           
         </div>
       </div>
@@ -320,25 +333,59 @@
       tCache.set(key, out);
       return out;
     }
+function toEmbedUrl(u){
+  if (!u) return u;
+  try {
+    const url = new URL(u);
 
-    function renderMedia(){
-      if (!ORIGINAL) return;
-      const mediaBox = document.getElementById('mediaBox');
-      mediaBox.innerHTML = '';
-
-      if (ORIGINAL.media_type === 'video') {
-        const iframe = document.createElement('iframe');
-        iframe.src = ORIGINAL.url;
-        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-        iframe.allowFullscreen = true;
-        mediaBox.appendChild(iframe);
-      } else {
-        const img = document.createElement('img');
-        img.src = ORIGINAL.url;
-        img.alt = ORIGINAL.title || '';
-        mediaBox.appendChild(img);
-      }
+    // YouTube watch?v= -> embed
+    if (url.hostname.includes('youtube.com')) {
+      const v = url.searchParams.get('v');
+      if (v) return `https://www.youtube.com/embed/${v}`;
+      if (url.pathname.startsWith('/embed/')) return u;
     }
+
+    // youtu.be/ID -> embed
+    if (url.hostname === 'youtu.be') {
+      const id = url.pathname.replace('/', '');
+      if (id) return `https://www.youtube.com/embed/${id}`;
+    }
+
+    return u;
+  } catch {
+    return u;
+  }
+}
+
+   function renderMedia(){
+  if (!ORIGINAL) return;
+  const mediaBox = document.getElementById('mediaBox');
+  mediaBox.innerHTML = '';
+
+  if (ORIGINAL.media_type === 'video') {
+    const iframe = document.createElement('iframe');
+    iframe.src = toEmbedUrl(ORIGINAL.url);
+    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+    iframe.allowFullscreen = true;
+    mediaBox.appendChild(iframe);
+
+    // fallback por si el proveedor bloquea el embed
+    const fallback = document.createElement('div');
+    fallback.style.padding = '10px';
+    fallback.style.fontSize = '12px';
+    fallback.style.opacity = '0.85';
+    fallback.innerHTML = (LANG === 'es')
+      ? `Si el video no carga, abrilo acá: <a href="${ORIGINAL.url}" target="_blank" rel="noopener">Ver video</a>`
+      : `If the video doesn't load, open it here: <a href="${ORIGINAL.url}" target="_blank" rel="noopener">Open video</a>`;
+    mediaBox.appendChild(fallback);
+
+  } else {
+    const img = document.createElement('img');
+    img.src = ORIGINAL.hdurl || ORIGINAL.url;
+    img.alt = ORIGINAL.title || '';
+    mediaBox.appendChild(img);
+  }
+}
 
     async function renderText(){
       if (!ORIGINAL) return;
