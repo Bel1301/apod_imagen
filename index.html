@@ -197,7 +197,7 @@
 
       <div class="rightTop">
         <div class="langToggle" aria-label="Cambiar idioma">
-          <button id="btnES" class="flagBtn" title="Español" onclick="setLang('es')">🇦🇷</button>
+          <button id="btnES" class="flagBtn" title="Español" onclick="setLang('es')"ES</button>
           <button id="btnEN" class="flagBtn" title="English" onclick="setLang('en')">🇺🇸</button>
         </div>
 
@@ -208,7 +208,7 @@
             <button class="dateBtn" onclick="go()" id="btnView">Ver</button>
           </div>
           <div id="err" class="error"></div>
-          <div class="smallNote" id="noteTip">Tip: podés pasar ?date=YYYY-MM-DD en la URL.</div>
+          
         </div>
       </div>
     </div>
@@ -268,14 +268,12 @@
         document.getElementById('labelDate').textContent = 'Fecha';
         document.getElementById('btnView').textContent = 'Ver';
         document.getElementById('labelSource').textContent = 'Fuente oficial:';
-        document.getElementById('noteTip').textContent = 'Tip: podés pasar ?date=YYYY-MM-DD en la URL.';
-        document.getElementById('footerHelp').textContent = 'Si el día es video, se mostrará embebido automáticamente.';
+        
       } else {
         document.getElementById('labelDate').textContent = 'Date';
         document.getElementById('btnView').textContent = 'View';
         document.getElementById('labelSource').textContent = 'Official source:';
-        document.getElementById('noteTip').textContent = 'Tip: you can pass ?date=YYYY-MM-DD in the URL.';
-        document.getElementById('footerHelp').textContent = 'If the day is a video, it will be embedded automatically.';
+        
       }
     }
 
