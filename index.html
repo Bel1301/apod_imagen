@@ -35,8 +35,12 @@
     }
 
     .rightTop{
-      display:flex; flex-direction:column; align-items:flex-end; gap:10px;
-    }
+  display:flex;
+  flex-direction:column;
+  align-items:center;  /* antes era flex-end */
+  gap:10px;
+}
+
 
     .langToggle{
       display:flex; gap:8px;
@@ -61,15 +65,21 @@
       border-color: rgba(139,107,61,.55);
     }
 
-    .badge{
-      font-size:12px; color:var(--muted);
-      border:1px solid var(--border);
-      padding:10px 12px;
-      border-radius:999px;
-      background: rgba(255,255,255,.55);
-      text-align:right;
-      min-width: 320px;
-    }
+   .badge{
+  font-size:12px; color:var(--muted);
+  border:1px solid var(--border);
+  padding:10px 12px;
+  border-radius:999px;
+  background: rgba(255,255,255,.55);
+
+  /* clave: que se ajuste al contenido */
+  display:inline-block;
+  width: fit-content;
+  min-width: unset;
+
+  text-align:left;  /* queda más prolijo */
+}
+
 
     .badgeRow{
       display:flex; align-items:center; justify-content:flex-end; gap:10px; margin-top:10px;
@@ -197,8 +207,9 @@
 
       <div class="rightTop">
         <div class="langToggle" aria-label="Cambiar idioma">
-          <button id="btnES" class="flagBtn" title="Español" onclick="setLang('es')">ES</button>
-          <button id="btnEN" class="flagBtn" title="English" onclick="setLang('en')">US</button>
+          <button id="btnES" class="flagBtn" title="Español" onclick="setLang('es')">🇪🇸</button>
+          <button id="btnEN" class="flagBtn" title="English" onclick="setLang('en')">🇺🇸</button>
+
         </div>
 
         <div class="badge">
