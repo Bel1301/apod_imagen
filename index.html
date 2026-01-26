@@ -333,39 +333,7 @@
       tCache.set(key, out);
       return out;
     }
-function toEmbedUrl(u){
-  if (!u) return u;
-  try {
-    const url = new URL(u);
 
-    // YouTube watch?v= -> embed
-    if (url.hostname.includes('youtube.com')) {
-      const v = url.searchParams.get('v');
-      if (v) return `https://www.youtube.com/embed/${v}`;
-      if (url.pathname.startsWith('/embed/')) return u;
-    }
-
-    // youtu.be/ID -> embed
-    if (url.hostname === 'youtu.be') {
-      const id = url.pathname.replace('/', '');
-      if (id) return `https://www.youtube.com/embed/${id}`;
-    }
-
-    // Vimeo vimeo.com/ID -> player.vimeo.com/video/ID
-    if (url.hostname.includes('vimeo.com')) {
-      // soporta vimeo.com/123456 o www.vimeo.com/123456
-      const parts = url.pathname.split('/').filter(Boolean);
-      const id = parts[0];
-      if (id && /^\d+$/.test(id)) return `https://player.vimeo.com/video/${id}`;
-      // si ya viene player.vimeo.com/video/ID, lo dejamos
-      if (url.hostname.includes('player.vimeo.com')) return u;
-    }
-
-    return u;
-  } catch {
-    return u;
-  }
-}
 function toEmbedUrl(u){
   if (!u) return u;
 
@@ -378,7 +346,7 @@ function toEmbedUrl(u){
 
       if (url.hostname === 'youtu.be') {
         id = url.pathname.replace('/', '');
-      } else if (url.hostname.includes('youtube.com')) {
+      } else {
         id = url.searchParams.get('v') || '';
         if (!id && url.pathname.startsWith('/embed/')) {
           id = url.pathname.split('/embed/')[1] || '';
@@ -386,14 +354,13 @@ function toEmbedUrl(u){
       }
 
       if (id) {
-        // Autoplay + mute + inline
         return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&playsinline=1&rel=0`;
       }
     }
 
     // Vimeo
     if (url.hostname.includes('vimeo.com')) {
-      // player.vimeo.com ya viene embebible
+      // Si ya viene player.vimeo.com, agregamos params
       if (url.hostname.includes('player.vimeo.com')) {
         const u2 = new URL(u);
         u2.searchParams.set('autoplay', '1');
@@ -403,8 +370,8 @@ function toEmbedUrl(u){
 
       // vimeo.com/ID -> player.vimeo.com/video/ID
       const parts = url.pathname.split('/').filter(Boolean);
-      const id = parts[0];
-      if (id && /^\d+$/.test(id)) {
+      const id = parts.find(p => /^\d+$/.test(p)); // busca el primer número en el path
+      if (id) {
         return `https://player.vimeo.com/video/${id}?autoplay=1&muted=1`;
       }
     }
@@ -414,6 +381,7 @@ function toEmbedUrl(u){
     return u;
   }
 }
+
 
 function isDirectVideoUrl(u){
   return typeof u === 'string' && /\.(mp4|webm|ogg)(\?|$)/i.test(u);
@@ -428,21 +396,21 @@ function renderMedia(){
   if (ORIGINAL.media_type === 'video') {
     const src = ORIGINAL.url;
 
-    // Caso 1: video directo (MP4/WebM)
+    // Caso 1: video directo
     if (isDirectVideoUrl(src)) {
       const v = document.createElement('video');
       v.src = src;
       v.controls = true;
       v.autoplay = true;
-      v.muted = true;         // clave para autoplay
-      v.playsInline = true;   // clave en móvil
+      v.muted = true;
+      v.playsInline = true;
       v.style.width = '100%';
       v.style.height = '100%';
       mediaBox.appendChild(v);
       return;
     }
 
-    // Caso 2: proveedor (YouTube/Vimeo) -> iframe
+    // Caso 2: embed (YouTube/Vimeo)
     const iframe = document.createElement('iframe');
     iframe.src = toEmbedUrl(src);
     iframe.title = ORIGINAL.title || 'APOD video';
@@ -452,8 +420,50 @@ function renderMedia(){
     iframe.style.width = '100%';
     iframe.style.height = '520px';
     iframe.style.border = '0';
-    mediaBox.appendChild(iframe);
 
+    // Fallback si el embed no carga (o queda vacío)
+    const fallback = () => {
+      mediaBox.innerHTML = '';
+
+      // Si tenemos thumbnail_url, lo mostramos clickeable
+      if (ORIGINAL.thumbnail_url) {
+        const a = document.createElement('a');
+        a.href = ORIGINAL.url;
+        a.target = '_blank';
+        a.rel = 'noopener';
+
+        const img = document.createElement('img');
+        img.src = ORIGINAL.thumbnail_url;
+        img.alt = ORIGINAL.title || 'Video';
+        a.appendChild(img);
+
+        mediaBox.appendChild(a);
+      } else {
+        const a = document.createElement('a');
+        a.href = ORIGINAL.url;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = (LANG === 'es') ? 'Abrir video' : 'Open video';
+        a.style.display = 'inline-block';
+        a.style.padding = '12px';
+        mediaBox.appendChild(a);
+      }
+    };
+
+    iframe.addEventListener('error', fallback);
+
+    // Timeout: si el proveedor bloquea, dejamos fallback en 2.5s
+    setTimeout(() => {
+      // Si no hay contenido visible, usamos fallback
+      // (no siempre es detectable, pero este approach es práctico)
+      if (mediaBox.contains(iframe)) {
+        // dejamos el iframe, pero si está en blanco el usuario igual puede abrir el link del costado
+        // si querés fallback agresivo, descomentá:
+        // fallback();
+      }
+    }, 2500);
+
+    mediaBox.appendChild(iframe);
     return;
   }
 
@@ -463,7 +473,6 @@ function renderMedia(){
   img.alt = ORIGINAL.title || '';
   mediaBox.appendChild(img);
 }
-
 
     async function renderText(){
       if (!ORIGINAL) return;
