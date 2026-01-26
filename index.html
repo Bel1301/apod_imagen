@@ -155,6 +155,53 @@
   .figure iframe, .figure video{ height:260px; }
 }
 
+/* Fallback video */
+.videoFallback{
+  position:relative;
+  width:100%;
+}
+
+.videoFallback img{
+  width:100%;
+  height:auto;
+  display:block;
+  border-radius: 12px;
+  border:1px solid rgba(0,0,0,.12);
+}
+
+.playBtn{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  background: linear-gradient(180deg, rgba(0,0,0,.10), rgba(0,0,0,.35));
+}
+
+.playBtn span{
+  width:64px;
+  height:64px;
+  border-radius:999px;
+  background: rgba(255,255,255,.90);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  border:1px solid rgba(0,0,0,.18);
+  box-shadow: 0 10px 30px rgba(0,0,0,.20);
+}
+
+.videoHint{
+  margin-top:10px;
+  font-size:12px;
+  color: rgba(0,0,0,.65);
+}
+.videoHint a{
+  color: var(--accent);
+  text-decoration:none;
+}
+
  }
 
     .copy p{
@@ -373,76 +420,123 @@ function isDirectVideoUrl(u){
   return typeof u === 'string' && /\.(mp4|webm|ogg)(\?|$)/i.test(u);
 }
 
+function showVideoFallback(mediaBox){
+  // Miniatura + botón play + link
+  const wrapper = document.createElement('div');
+  wrapper.className = 'videoFallback';
+
+  const img = document.createElement('img');
+  img.src = ORIGINAL.thumbnail_url || '';
+  img.alt = ORIGINAL.title || 'Video';
+
+  const play = document.createElement('div');
+  play.className = 'playBtn';
+  play.innerHTML = '<span>▶</span>';
+
+  wrapper.appendChild(img);
+  wrapper.appendChild(play);
+
+  const hint = document.createElement('div');
+  hint.className = 'videoHint';
+  hint.innerHTML = (LANG === 'es')
+    ? `Si no se puede reproducir aquí, <a href="${ORIGINAL.url}" target="_blank" rel="noopener">abrilo en otra pestaña</a>.`
+    : `If it can't play here, <a href="${ORIGINAL.url}" target="_blank" rel="noopener">open it in a new tab</a>.`;
+
+  mediaBox.appendChild(wrapper);
+  mediaBox.appendChild(hint);
+
+  // Click: intento de cargar iframe en gesto del usuario (a veces destraba autoplay)
+  play.addEventListener('click', () => {
+    mediaBox.innerHTML = '';
+
+    const iframe = document.createElement('iframe');
+    iframe.src = toEmbedUrl(ORIGINAL.url);
+    iframe.title = ORIGINAL.title || 'APOD video';
+    iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
+    iframe.allowFullscreen = true;
+    iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+    mediaBox.appendChild(iframe);
+
+    // Si después de 2s sigue sin verse, abrimos en nueva pestaña
+    setTimeout(() => {
+      // no siempre se puede detectar “en blanco”, así que ofrecemos salida segura
+      // (esto evita frustración del usuario)
+      const a = document.createElement('a');
+      a.href = ORIGINAL.url;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.style.display = 'inline-block';
+      a.style.margin = '10px';
+      a.style.fontSize = '12px';
+      a.textContent = (LANG === 'es') ? 'Abrir video en otra pestaña' : 'Open video in new tab';
+      mediaBox.appendChild(a);
+    }, 2000);
+  });
+}
+
 function renderMedia(){
   if (!ORIGINAL) return;
 
   const mediaBox = document.getElementById('mediaBox');
   mediaBox.innerHTML = '';
 
-  // VIDEO
   if (ORIGINAL.media_type === 'video') {
     const src = ORIGINAL.url;
 
-    // 1) Si es mp4 directo -> <video> real
+    // Caso 1: video directo (mp4/webm/ogg) -> <video>
     if (isDirectVideoUrl(src)) {
       const v = document.createElement('video');
       v.src = src;
       v.controls = true;
       v.autoplay = true;
       v.muted = true;       // autoplay permitido
-      v.playsInline = true;
-      v.style.width = '100%';
-      v.style.height = '100%';
+      v.playsInline = true; // móvil
       mediaBox.appendChild(v);
       return;
     }
 
-    // 2) Si no es mp4 -> intentamos iframe embebible
+    // Caso 2: proveedor (YouTube/Vimeo/otros) -> intentamos iframe
     const iframe = document.createElement('iframe');
     iframe.src = toEmbedUrl(src);
     iframe.title = ORIGINAL.title || 'APOD video';
     iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
     iframe.allowFullscreen = true;
     iframe.referrerPolicy = 'strict-origin-when-cross-origin';
-    iframe.style.width = '100%';
-    iframe.style.height = '520px';
-    iframe.style.border = '0';
+
+    // Si el proveedor bloquea iframe, mostramos fallback (miniatura/play)
+    iframe.addEventListener('error', () => {
+      mediaBox.innerHTML = '';
+      showVideoFallback(mediaBox);
+    });
+
     mediaBox.appendChild(iframe);
 
-    // 3) Fallback visible SIEMPRE (porque algunos bloquean iframe)
-    // Muestra thumbnail clickeable (si la NASA lo entrega con thumbs=true)
-    const fallbackWrap = document.createElement('div');
-    fallbackWrap.style.padding = '10px';
-    fallbackWrap.style.fontSize = '12px';
-    fallbackWrap.style.opacity = '0.9';
-
+    // Fallback preventivo: si tenemos thumbnail_url, lo mostramos debajo con play
+    // (esto garantiza que el usuario siempre tenga algo usable)
     if (ORIGINAL.thumbnail_url) {
-      fallbackWrap.innerHTML = `
-        <div style="margin-bottom:6px;">
-          ${LANG === 'es' ? 'Si el video no se ve arriba, tocá la miniatura:' : 'If the video is blank above, click the thumbnail:'}
-        </div>
-        <a href="${src}" target="_blank" rel="noopener">
-          <img src="${ORIGINAL.thumbnail_url}" alt="${ORIGINAL.title || 'Video'}" style="width:100%;border-radius:10px;border:1px solid rgba(0,0,0,.12)" />
-        </a>
-      `;
+      showVideoFallback(mediaBox);
     } else {
-      fallbackWrap.innerHTML = `
-        <a href="${src}" target="_blank" rel="noopener">
-          ${LANG === 'es' ? 'Abrir video' : 'Open video'}
-        </a>
-      `;
+      // Si no hay thumbnail, al menos un link
+      const hint = document.createElement('div');
+      hint.className = 'videoHint';
+      hint.innerHTML = (LANG === 'es')
+        ? `<a href="${src}" target="_blank" rel="noopener">Abrir video</a>`
+        : `<a href="${src}" target="_blank" rel="noopener">Open video</a>`;
+      mediaBox.appendChild(hint);
     }
 
-    mediaBox.appendChild(fallbackWrap);
     return;
   }
 
-  // IMAGEN
+  // Imagen
   const img = document.createElement('img');
   img.src = ORIGINAL.hdurl || ORIGINAL.url;
   img.alt = ORIGINAL.title || '';
   mediaBox.appendChild(img);
 }
+
+
+
 
     async function renderText(){
       if (!ORIGINAL) return;
@@ -497,7 +591,7 @@ function renderMedia(){
         }
 
         ORIGINAL = data;
-console.log("APOD:", ORIGINAL.media_type, ORIGINAL.url);
+
 
         renderMedia();
         await renderText();
