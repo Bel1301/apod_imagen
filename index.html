@@ -527,6 +527,7 @@ function renderMedia(){
         }
 
         ORIGINAL = data;
+console.log("APOD:", ORIGINAL.media_type, ORIGINAL.url);
 
         renderMedia();
         await renderText();
