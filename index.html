@@ -145,17 +145,16 @@
     }
 
  
-.figure iframe{
+.figure iframe, .figure video{
   width:100%;
-  height: 520px;       /* para que se vea bien en desktop */
+  height:520px;
   border:0;
   display:block;
 }
-
 @media (max-width: 900px){
-  .figure iframe{
-    height: 260px;     /* más chico en celular */
-  }
+  .figure iframe, .figure video{ height:260px; }
+}
+
  }
 
     .copy p{
@@ -343,37 +342,25 @@ function toEmbedUrl(u){
     // YouTube
     if (url.hostname.includes('youtube.com') || url.hostname === 'youtu.be') {
       let id = '';
-
-      if (url.hostname === 'youtu.be') {
-        id = url.pathname.replace('/', '');
-      } else {
+      if (url.hostname === 'youtu.be') id = url.pathname.replace('/', '');
+      else {
         id = url.searchParams.get('v') || '';
-        if (!id && url.pathname.startsWith('/embed/')) {
-          id = url.pathname.split('/embed/')[1] || '';
-        }
+        if (!id && url.pathname.startsWith('/embed/')) id = url.pathname.split('/embed/')[1] || '';
       }
-
-      if (id) {
-        return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&playsinline=1&rel=0`;
-      }
+      if (id) return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&playsinline=1&rel=0`;
     }
 
     // Vimeo
     if (url.hostname.includes('vimeo.com')) {
-      // Si ya viene player.vimeo.com, agregamos params
       if (url.hostname.includes('player.vimeo.com')) {
         const u2 = new URL(u);
-        u2.searchParams.set('autoplay', '1');
-        u2.searchParams.set('muted', '1');
+        u2.searchParams.set('autoplay','1');
+        u2.searchParams.set('muted','1');
         return u2.toString();
       }
-
-      // vimeo.com/ID -> player.vimeo.com/video/ID
       const parts = url.pathname.split('/').filter(Boolean);
-      const id = parts.find(p => /^\d+$/.test(p)); // busca el primer número en el path
-      if (id) {
-        return `https://player.vimeo.com/video/${id}?autoplay=1&muted=1`;
-      }
+      const id = parts.find(p => /^\d+$/.test(p));
+      if (id) return `https://player.vimeo.com/video/${id}?autoplay=1&muted=1`;
     }
 
     return u;
@@ -381,7 +368,6 @@ function toEmbedUrl(u){
     return u;
   }
 }
-
 
 function isDirectVideoUrl(u){
   return typeof u === 'string' && /\.(mp4|webm|ogg)(\?|$)/i.test(u);
@@ -393,16 +379,17 @@ function renderMedia(){
   const mediaBox = document.getElementById('mediaBox');
   mediaBox.innerHTML = '';
 
+  // VIDEO
   if (ORIGINAL.media_type === 'video') {
     const src = ORIGINAL.url;
 
-    // Caso 1: video directo
+    // 1) Si es mp4 directo -> <video> real
     if (isDirectVideoUrl(src)) {
       const v = document.createElement('video');
       v.src = src;
       v.controls = true;
       v.autoplay = true;
-      v.muted = true;
+      v.muted = true;       // autoplay permitido
       v.playsInline = true;
       v.style.width = '100%';
       v.style.height = '100%';
@@ -410,64 +397,47 @@ function renderMedia(){
       return;
     }
 
-    // Caso 2: embed (YouTube/Vimeo)
+    // 2) Si no es mp4 -> intentamos iframe embebible
     const iframe = document.createElement('iframe');
     iframe.src = toEmbedUrl(src);
     iframe.title = ORIGINAL.title || 'APOD video';
-    iframe.referrerPolicy = 'strict-origin-when-cross-origin';
     iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
     iframe.allowFullscreen = true;
+    iframe.referrerPolicy = 'strict-origin-when-cross-origin';
     iframe.style.width = '100%';
     iframe.style.height = '520px';
     iframe.style.border = '0';
-
-    // Fallback si el embed no carga (o queda vacío)
-    const fallback = () => {
-      mediaBox.innerHTML = '';
-
-      // Si tenemos thumbnail_url, lo mostramos clickeable
-      if (ORIGINAL.thumbnail_url) {
-        const a = document.createElement('a');
-        a.href = ORIGINAL.url;
-        a.target = '_blank';
-        a.rel = 'noopener';
-
-        const img = document.createElement('img');
-        img.src = ORIGINAL.thumbnail_url;
-        img.alt = ORIGINAL.title || 'Video';
-        a.appendChild(img);
-
-        mediaBox.appendChild(a);
-      } else {
-        const a = document.createElement('a');
-        a.href = ORIGINAL.url;
-        a.target = '_blank';
-        a.rel = 'noopener';
-        a.textContent = (LANG === 'es') ? 'Abrir video' : 'Open video';
-        a.style.display = 'inline-block';
-        a.style.padding = '12px';
-        mediaBox.appendChild(a);
-      }
-    };
-
-    iframe.addEventListener('error', fallback);
-
-    // Timeout: si el proveedor bloquea, dejamos fallback en 2.5s
-    setTimeout(() => {
-      // Si no hay contenido visible, usamos fallback
-      // (no siempre es detectable, pero este approach es práctico)
-      if (mediaBox.contains(iframe)) {
-        // dejamos el iframe, pero si está en blanco el usuario igual puede abrir el link del costado
-        // si querés fallback agresivo, descomentá:
-        // fallback();
-      }
-    }, 2500);
-
     mediaBox.appendChild(iframe);
+
+    // 3) Fallback visible SIEMPRE (porque algunos bloquean iframe)
+    // Muestra thumbnail clickeable (si la NASA lo entrega con thumbs=true)
+    const fallbackWrap = document.createElement('div');
+    fallbackWrap.style.padding = '10px';
+    fallbackWrap.style.fontSize = '12px';
+    fallbackWrap.style.opacity = '0.9';
+
+    if (ORIGINAL.thumbnail_url) {
+      fallbackWrap.innerHTML = `
+        <div style="margin-bottom:6px;">
+          ${LANG === 'es' ? 'Si el video no se ve arriba, tocá la miniatura:' : 'If the video is blank above, click the thumbnail:'}
+        </div>
+        <a href="${src}" target="_blank" rel="noopener">
+          <img src="${ORIGINAL.thumbnail_url}" alt="${ORIGINAL.title || 'Video'}" style="width:100%;border-radius:10px;border:1px solid rgba(0,0,0,.12)" />
+        </a>
+      `;
+    } else {
+      fallbackWrap.innerHTML = `
+        <a href="${src}" target="_blank" rel="noopener">
+          ${LANG === 'es' ? 'Abrir video' : 'Open video'}
+        </a>
+      `;
+    }
+
+    mediaBox.appendChild(fallbackWrap);
     return;
   }
 
-  // Imagen
+  // IMAGEN
   const img = document.createElement('img');
   img.src = ORIGINAL.hdurl || ORIGINAL.url;
   img.alt = ORIGINAL.title || '';
