@@ -305,20 +305,7 @@
     syncLangUI();
     renderText();
   }
-  function openInNewTab(url){
-  if (!url) return;
-
-  // Normaliza URLs raras tipo //dominio.com/...
-  const fixed = url.startsWith('//') ? ('https:' + url) : url;
-
-  const a = document.createElement('a');
-  a.href = fixed;
-  a.target = '_blank';
-  a.rel = 'noopener noreferrer';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-}
+  
 function normalizeUrl(u){
   if (!u) return '';
   const s = String(u).trim();
@@ -506,8 +493,6 @@ play.addEventListener('click', () => {
   openInNewTab(ORIGINAL.url);
 });
 
-
-});
 
 
     mediaBox.appendChild(wrapper);
