@@ -9,7 +9,7 @@ export default async function handler(req, res) {
 
     const url = new URL("https://api.nasa.gov/planetary/apod");
     url.searchParams.set("api_key", apiKey);
-    url.searchParams.set("thumbs", "true"); // 👈 CLAVE para videos
+    url.searchParams.set("thumbs", "true"); // miniatura para videos
     if (date) url.searchParams.set("date", date);
 
     const r = await fetch(url.toString());
@@ -19,16 +19,30 @@ export default async function handler(req, res) {
       return res.status(r.status).json({ error: "Error NASA", nasa: data });
     }
 
-    // Devolvemos todo lo necesario para imagen o video
+    // 👉 Página oficial APOD (siempre existe)
+    const apodPageUrl = data.date
+      ? `https://apod.nasa.gov/apod/ap${data.date.replaceAll('-', '').slice(2)}.html`
+      : null;
+
+    // 👉 Recurso real (imagen HD o video)
+    const assetUrl = data.hdurl || data.url || null;
+
     return res.status(200).json({
       date: data.date,
       title: data.title,
       explanation: data.explanation,
-      media_type: data.media_type, // image | video
-      url: data.url,               // imagen o video (youtube/vimeo)
-      hdurl: data.hdurl || null,   // solo cuando es imagen
-      thumbnail_url: data.thumbnail_url || null // 👈 ahora sí viene para video
+      media_type: data.media_type,
+
+      // originales
+      url: data.url,
+      hdurl: data.hdurl || null,
+      thumbnail_url: data.thumbnail_url || null,
+
+      // ✅ NUEVOS (los que te faltaban)
+      apod_page_url: apodPageUrl,
+      asset_url: assetUrl
     });
+
   } catch (e) {
     return res.status(500).json({ error: "Error interno" });
   }
