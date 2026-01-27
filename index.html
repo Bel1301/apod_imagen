@@ -394,6 +394,8 @@ remember
 
 function renderMedia(){
   if (!ORIGINAL) return;
+document.getElementById('debugMedia').textContent =
+  'media_type: ' + data.media_type;
 
 
   const type = (ORIGINAL.media_type || '').toLowerCase();
