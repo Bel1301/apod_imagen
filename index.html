@@ -499,9 +499,22 @@ play.addEventListener('click', () => {
   async function renderText(){
     if (!ORIGINAL) return;
 
- const bestLink = resolveExternalUrl(ORIGINAL.hdurl || ORIGINAL.url); // si es imagen, hdurl es mejor
-document.getElementById('nasaLink').href = bestLink || '#';
-document.getElementById('resourceBtn').href = bestLink || '#';
+const nasaPage = resolveExternalUrl(ORIGINAL.apod_page_url || '');
+const asset = resolveExternalUrl(ORIGINAL.asset_url || ORIGINAL.hdurl || ORIGINAL.url || '');
+
+document.getElementById('nasaLink').href = nasaPage || '#';
+document.getElementById('resourceBtn').href = asset || '#';
+
+// Si querés forzar que siempre abra afuera (más robusto):
+document.getElementById('nasaLink').onclick = (e) => {
+  e.preventDefault();
+  openInNewTab(nasaPage);
+};
+document.getElementById('resourceBtn').onclick = (e) => {
+  e.preventDefault();
+  openInNewTab(asset);
+};
+
 
 
 document.getElementById('nasaLink').onclick = (e) => {
