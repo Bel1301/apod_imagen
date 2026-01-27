@@ -349,6 +349,7 @@
     return out;
   }
 
+  // Solo para convertir YouTube/Vimeo a URLs embebibles (si las querés usar)
   function toEmbedUrl(u){
     if (!u) return u;
     try {
@@ -361,7 +362,6 @@
         else {
           id = url.searchParams.get('v') || '';
           if (!id && url.pathname.startsWith('/embed/')) id = url.pathname.split('/embed/')[1] || '';
-remember
         }
         if (id) return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&playsinline=1&rel=0`;
       }
@@ -385,94 +385,72 @@ remember
     }
   }
 
- function isDirectVideoUrl(u){
-  return typeof u === 'string' && /\.(mp4|webm|ogg)(\?|$)/i.test(u);
-}
-
-function renderMedia(){
-  if (!ORIGINAL) return;
-document.getElementById('debugMedia').textContent =
-  'media_type: ' + data.media_type;
-
-
-  const type = (ORIGINAL.media_type || '').toLowerCase();
-  const src = ORIGINAL.url;
-
-  // 1) IMAGEN
-  if (type === 'image') {
-    const img = document.createElement('img');
-    img.src = ORIGINAL.hdurl || ORIGINAL.url;
-    img.alt = ORIGINAL.title || '';
-    mediaBox.appendChild(img);
-    return;
+  function isDirectVideoUrl(u){
+    return typeof u === 'string' && /\.(mp4|webm|ogg)(\?|$)/i.test(u);
   }
 
-  // 2) TODO LO QUE NO ES IMAGE (video u other): tratamos de reproducirlo
-  // 2.a) si es mp4/webm directo -> <video>
-  if (isDirectVideoUrl(src)) {
-    const v = document.createElement('video');
-    v.src = src;
-    v.controls = true;
-    v.autoplay = true;
-    v.muted = true;       // autoplay permitido
-    v.playsInline = true; // móvil
-    v.style.width = '100%';
-    v.style.height = '520px';
-    v.style.border = '0';
-    mediaBox.appendChild(v);
-    return;
+  function renderMedia(){
+    if (!ORIGINAL) return;
+
+    const mediaBox = document.getElementById('mediaBox');
+    mediaBox.innerHTML = '';
+
+    const type = (ORIGINAL.media_type || '').toLowerCase();
+    const src = ORIGINAL.url;
+
+    // IMAGEN
+    if (type === 'image') {
+      const img = document.createElement('img');
+      img.src = ORIGINAL.hdurl || ORIGINAL.url;
+      img.alt = ORIGINAL.title || '';
+      mediaBox.appendChild(img);
+      return;
+    }
+
+    // VIDEO DIRECTO (mp4/webm/ogg)
+    if (isDirectVideoUrl(src)) {
+      const v = document.createElement('video');
+      v.src = src;
+      v.controls = true;
+      v.autoplay = true;
+      v.muted = true;
+      v.playsInline = true;
+      mediaBox.appendChild(v);
+      return;
+    }
+
+    // OTHER o VIDEO NO DIRECTO: mostramos fallback con Play y abrimos el recurso
+    const wrapper = document.createElement('div');
+    wrapper.className = 'videoFallback';
+
+    if (ORIGINAL.thumbnail_url) {
+      const img = document.createElement('img');
+      img.src = ORIGINAL.thumbnail_url;
+      img.alt = ORIGINAL.title || 'Recurso';
+      wrapper.appendChild(img);
+    }
+
+    const play = document.createElement('div');
+    play.className = 'playBtn';
+    play.innerHTML = '<span>▶</span>';
+    wrapper.appendChild(play);
+
+    play.addEventListener('click', () => {
+      window.open(src, '_blank', 'noopener');
+    });
+
+    mediaBox.appendChild(wrapper);
+
+    // Mensaje claro debajo del cuadro
+    const hint = document.createElement('div');
+    hint.className = 'error';
+    hint.style.opacity = '0.75';
+    hint.style.marginTop = '8px';
+    hint.textContent = (LANG === 'es')
+      ? 'Este contenido se abre en una nueva pestaña por restricciones del proveedor.'
+      : 'This content opens in a new tab due to provider restrictions.';
+    mediaBox.appendChild(hint);
   }
-
-  // 2.b) si no es mp4: mostramos fallback con PLAY (siempre visible)
-  const wrapper = document.createElement('div');
-  wrapper.className = 'videoFallback';
-
-  if (ORIGINAL.thumbnail_url) {
-    const img = document.createElement('img');
-    img.src = ORIGINAL.thumbnail_url;
-    img.alt = ORIGINAL.title || 'Recurso';
-    wrapper.appendChild(img);
-  }
-
-  const play = document.createElement('div');
-  play.className = 'playBtn';
-  play.innerHTML = '<span>▶</span>';
-  wrapper.appendChild(play);
-
-  play.addEventListener('click', () => {
-  window.open(src, '_blank', 'noopener');
-});
-<div style="font-size:12px; opacity:.7; text-align:center; margin-top:8px;">
-  Este contenido se abre en una nueva pestaña por restricciones del proveedor.
-</div>
-
-
-    const iframe = document.createElement('iframe');
-    iframe.src = toEmbedUrl(src); // tu función toEmbedUrl (una sola)
-    iframe.title = ORIGINAL.title || 'APOD';
-    iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
-    iframe.allowFullscreen = true;
-    iframe.referrerPolicy = 'strict-origin-when-cross-origin';
-    iframe.style.width = '100%';
-    iframe.style.height = '520px';
-    iframe.style.border = '0';
-
-    mediaBox.appendChild(iframe);
-
-    // si el sitio bloquea iframes, al menos dejamos link de salida
-    const a = document.createElement('a');
-    a.href = src;
-    a.target = '_blank';
-    a.rel = 'noopener';
-    a.style.display = 'inline-block';
-    a.style.margin = '10px';
-    a.style.fontSize = '12px';
-    a.textContent = (LANG === 'es') ? 'Abrir recurso en otra pestaña' : 'Open in new tab';
-    mediaBox.appendChild(a);
-  });
-
-  mediaBox.appendChild(wrapper);
-}
 
   async function renderText(){
     if (!ORIGINAL) return;
@@ -510,7 +488,7 @@ document.getElementById('debugMedia').textContent =
     errBox.textContent = '';
 
     try {
-      const r = await fetch(apiUrl.toString());
+      const r = await fetch(apiUrl.toString(), { cache: 'no-store' });
       const data = await r.json();
 
       if (!r.ok || data?.error) {
@@ -522,8 +500,6 @@ document.getElementById('debugMedia').textContent =
       }
 
       ORIGINAL = data;
-document.getElementById('debugMedia').textContent =
-  'media_type: ' + data.media_type;
 
       renderMedia();
       await renderText();
