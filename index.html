@@ -255,6 +255,9 @@
     <input id="d" class="dateInput" type="date">
     <button class="dateBtn" onclick="go()" id="btnView">Ver</button>
   </div>
+<div id="debugMedia" style="font-size:11px; opacity:.7; text-align:center; margin-top:4px;">
+  media_type: —
+</div>
 
   <div id="err" class="error"></div>
   
@@ -496,6 +499,8 @@ remember
       }
 
       ORIGINAL = data;
+document.getElementById('debugMedia').textContent =
+  'media_type: ' + data.media_type;
 
       renderMedia();
       await renderText();
