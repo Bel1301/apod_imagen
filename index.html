@@ -450,10 +450,10 @@
     play.innerHTML = '<span>▶</span>';
     wrapper.appendChild(play);
 
-  document.getElementById('resourceBtn').addEventListener('click', (e) => {
-  e.preventDefault();
-  openInNewTab(ORIGINAL.url);
+  play.addEventListener('click', () => {
+  openInNewTab(document.getElementById('nasaLink').href);
 });
+
 
     mediaBox.appendChild(wrapper);
 
