@@ -395,8 +395,6 @@ remember
 function renderMedia(){
   if (!ORIGINAL) return;
 
-  const mediaBox = document.getElementById('mediaBox');
-  mediaBox.innerHTML = '';
 
   const type = (ORIGINAL.media_type || '').toLowerCase();
   const src = ORIGINAL.url;
@@ -443,8 +441,12 @@ function renderMedia(){
   wrapper.appendChild(play);
 
   play.addEventListener('click', () => {
-    // intento de embebido en gesto del usuario
-    mediaBox.innerHTML = '';
+  window.open(src, '_blank', 'noopener');
+});
+<div style="font-size:12px; opacity:.7; text-align:center; margin-top:8px;">
+  Este contenido se abre en una nueva pestaña por restricciones del proveedor.
+</div>
+
 
     const iframe = document.createElement('iframe');
     iframe.src = toEmbedUrl(src); // tu función toEmbedUrl (una sola)
