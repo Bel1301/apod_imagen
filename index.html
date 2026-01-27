@@ -306,19 +306,7 @@
     renderText();
   }
   
-function normalizeUrl(u){
-  if (!u) return '';
-  const s = String(u).trim();
 
-  // ya viene bien
-  if (s.startsWith('http://') || s.startsWith('https://')) return s;
-
-  // protocol-relative: //dominio.com/...
-  if (s.startsWith('//')) return 'https:' + s;
-
-  // si viene algo tipo "www.youtube.com/..." o "apod.nasa.gov/..."
-  return 'https://' + s;
-}
 
 function resolveExternalUrl(u){
   if (!u) return '';
@@ -516,8 +504,15 @@ document.getElementById('nasaLink').href = bestLink || '#';
 document.getElementById('resourceBtn').href = bestLink || '#';
 
 
+document.getElementById('nasaLink').onclick = (e) => {
+  e.preventDefault();
+  openInNewTab(bestLink);
+};
+document.getElementById('resourceBtn').onclick = (e) => {
+  e.preventDefault();
+  openInNewTab(bestLink);
+};
 
-    document.getElementById('dateText').textContent = ORIGINAL.date || '—';
 
     let title = ORIGINAL.title || '—';
     let explanation = ORIGINAL.explanation || '';
