@@ -304,6 +304,21 @@
     syncLangUI();
     renderText();
   }
+  function openInNewTab(url){
+  if (!url) return;
+
+  // Normaliza URLs raras tipo //dominio.com/...
+  const fixed = url.startsWith('//') ? ('https:' + url) : url;
+
+  const a = document.createElement('a');
+  a.href = fixed;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
 
   function syncLangUI(){
     document.getElementById('btnES').classList.toggle('active', LANG === 'es');
@@ -435,9 +450,10 @@
     play.innerHTML = '<span>▶</span>';
     wrapper.appendChild(play);
 
-    play.addEventListener('click', () => {
-      window.open(src, '_blank', 'noopener');
-    });
+  document.getElementById('resourceBtn').addEventListener('click', (e) => {
+  e.preventDefault();
+  openInNewTab(ORIGINAL.url);
+});
 
     mediaBox.appendChild(wrapper);
 
