@@ -333,18 +333,42 @@ function normalizeUrl(u){
   return 'https://' + s;
 }
 
-function openInNewTab(url){
-  const fixed = normalizeUrl(url);
-  if (!fixed) return;
+function resolveExternalUrl(u){
+  if (!u) return '';
+  const s = String(u).trim();
+
+  // ya absoluta
+  if (s.startsWith('http://') || s.startsWith('https://')) return s;
+
+  // protocol-relative
+  if (s.startsWith('//')) return 'https:' + s;
+
+  // ruta relativa: /apod/ap260113.html  -> apod.nasa.gov + path
+  if (s.startsWith('/')) return 'https://apod.nasa.gov' + s;
+
+  // dominio sin protocolo: apod.nasa.gov/...
+  if (s.startsWith('apod.nasa.gov')) return 'https://' + s;
+
+  // www sin protocolo
+  if (s.startsWith('www.')) return 'https://' + s;
+
+  // fallback genérico
+  return 'https://' + s;
+}
+
+function openInNewTab(u){
+  const url = resolveExternalUrl(u);
+  if (!url) return;
 
   const a = document.createElement('a');
-  a.href = fixed;
+  a.href = url;
   a.target = '_blank';
   a.rel = 'noopener noreferrer';
   document.body.appendChild(a);
   a.click();
   a.remove();
 }
+
 
 
   function syncLangUI(){
@@ -476,9 +500,12 @@ function openInNewTab(url){
     play.className = 'playBtn';
     play.innerHTML = '<span>▶</span>';
     wrapper.appendChild(play);
+    
+play.addEventListener('click', () => {
+  // para image/video/other: abre el link original resuelto
+  openInNewTab(ORIGINAL.url);
+});
 
-  play.addEventListener('click', () => {
- openInNewTab(src);
 
 });
 
@@ -499,9 +526,10 @@ function openInNewTab(url){
   async function renderText(){
     if (!ORIGINAL) return;
 
-    const link = normalizeUrl(ORIGINAL.url);
-document.getElementById('nasaLink').href = link || '#';
-document.getElementById('resourceBtn').href = link || '#';
+ const bestLink = resolveExternalUrl(ORIGINAL.hdurl || ORIGINAL.url); // si es imagen, hdurl es mejor
+document.getElementById('nasaLink').href = bestLink || '#';
+document.getElementById('resourceBtn').href = bestLink || '#';
+
 
 
     document.getElementById('dateText').textContent = ORIGINAL.date || '—';
