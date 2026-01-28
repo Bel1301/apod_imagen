@@ -1,611 +1,277 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>NASA Daily • APOD</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>NASA Daily • APOD</title>
 
-  <style>
-    :root{
-      --bg:#f6f1e7;
-      --bg2:#efe7d8;
+<style>
+:root{
+  --bg:#f6f1e7;
+  --bg2:#efe7d8;
+  --text:#2b2b2b;
+  --muted:#6b6b6b;
+  --accent:#8b6b3d;
+  --border:rgba(0,0,0,.12);
+  --card:rgba(255,255,255,.55);
+  --card2:rgba(255,255,255,.35);
+}
 
-      --text:#2b2b2b;
-      --muted:#6b6b6b;
-      --accent:#8b6b3d;
-      --border:rgba(0,0,0,.12);
-      --card:rgba(255,255,255,.55);
-      --card2:rgba(255,255,255,.35);
-    }
+body{
+  margin:0;
+  background:radial-gradient(1200px 600px at 20% 0%, var(--bg2) 0%, var(--bg) 60%);
+  color:var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+}
 
-    body{
-      margin:0;
-      background:radial-gradient(1200px 600px at 20% 0%, var(--bg2) 0%, var(--bg) 60%);
-      color:var(--text);
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-    }
+.wrap{ max-width:980px; margin:0 auto; padding:28px 18px 60px; }
 
-    .wrap{ max-width: 980px; margin: 0 auto; padding: 28px 18px 60px; }
+.card{
+  background:linear-gradient(180deg,var(--card),var(--card2));
+  border:1px solid var(--border);
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 20px 50px rgba(0,0,0,.18);
+}
 
-    .masthead{
-      display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:18px;
-    }
+.hero{ padding:22px 22px 0; }
 
-    .brand{
-      font-weight:800; letter-spacing:.6px; font-size:14px; color:var(--muted); text-transform:uppercase;
-    }
+h1{
+  margin:10px 0 8px;
+  font-size:clamp(26px,4vw,42px);
+}
 
-    .rightTop{
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:10px;
-    }
+.meta{
+  font-size:13px;
+  color:var(--muted);
+}
 
-    .langToggle{ display:flex; gap:8px; }
+.meta a{
+  color:var(--accent);
+  text-decoration:none;
+}
 
-    .flagBtn{
-      width:38px; height:38px;
-      border-radius:999px;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.55);
-      cursor:pointer;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:0;
-    }
-    .flagBtn img{
-      width:20px;
-      height:14px;
-      border-radius:3px;
-      display:block;
-    }
-    .flagBtn.active{
-      outline:2px solid rgba(139,107,61,.35);
-      border-color: rgba(139,107,61,.55);
-    }
+.content{
+  display:grid;
+  grid-template-columns:1.4fr .9fr;
+  gap:18px;
+  padding:18px 22px 22px;
+}
 
-    .badge{
-      border:1px solid var(--border);
-      padding:10px 12px;
-      border-radius:999px;
-      background: rgba(255,255,255,.55);
-      width: fit-content;
-    }
-    .badgeTop{ text-align:center; width:100%; }
+@media (max-width:900px){
+  .content{ grid-template-columns:1fr; }
+}
 
-    .badgeRow{
-      display:flex; align-items:center; justify-content:flex-end; gap:10px; margin-top:10px;
-    }
+.figure{
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:rgba(255,255,255,.4);
+  min-height:320px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
 
-    .dateInput{
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(0,0,0,.18);
-      background:rgba(255,255,255,.75);
-      color:var(--text);
-      outline:none;
-    }
+.figure img{
+  width:100%;
+  height:auto;
+  display:block;
+}
 
-    .dateBtn{
-      padding:6px 12px;
-      border-radius:999px;
-      border:1px solid rgba(139,107,61,.55);
-      background:rgba(139,107,61,.12);
-      color:var(--text);
-      cursor:pointer;
-    }
+.videoFallback{
+  position:relative;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,.08);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
 
-    .card{
-      background: linear-gradient(180deg, var(--card), var(--card2));
-      border:1px solid var(--border);
-      border-radius: 18px;
-      overflow:hidden;
-      box-shadow: 0 20px 50px rgba(0,0,0,.18);
-      backdrop-filter: blur(6px);
-    }
+.playBtn{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
 
-    .hero{ padding: 22px 22px 0; }
-    h1{ margin: 10px 0 8px; font-size: clamp(26px, 4vw, 42px); line-height:1.05; }
+.playBtn span{
+  width:72px;
+  height:72px;
+  border-radius:999px;
+  background:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+}
 
-    .meta{
-      display:flex; flex-wrap:wrap; gap:10px; align-items:center;
-      color:var(--muted); font-size:13px; margin-bottom: 8px;
-    }
-    .meta a{ color:var(--accent); text-decoration:none; }
+.copy{
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:16px;
+  background:rgba(255,255,255,.45);
+}
 
-    .content{
-      display:grid; grid-template-columns: 1.4fr .9fr; gap: 18px;
-      padding: 18px 22px 22px;
-    }
-    @media (max-width: 900px){ .content{ grid-template-columns: 1fr; } }
+.copy p{
+  font-size:15px;
+  line-height:1.55;
+  white-space:pre-wrap;
+}
 
-    .figure{
-      border:1px solid var(--border);
-      border-radius: 14px;
-      overflow:hidden;
-      background: rgba(255,255,255,.40);
-      min-height: 320px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
+.actions{ margin-top:12px; }
 
-    .figure img{
-      width:100%;
-      height:auto;
-      display:block;
-    }
+.btn{
+  display:inline-block;
+  padding:10px 14px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.55);
+  text-decoration:none;
+  color:var(--text);
+}
 
-    .figure iframe, .figure video{
-      width:100%;
-      height:520px;
-      border:0;
-      display:block;
-    }
-    @media (max-width: 900px){
-      .figure iframe, .figure video{ height:260px; }
-    }
+.btn.primary{
+  border-color:rgba(139,107,61,.55);
+  background:rgba(139,107,61,.12);
+}
 
-    .copy{
-      border:1px solid var(--border);
-      border-radius:14px;
-      padding:16px;
-      background: rgba(255,255,255,.45);
-    }
-
-    .copy p{
-      margin:0;
-      color:var(--text);
-      line-height:1.55;
-      font-size:15px;
-      white-space: pre-wrap;
-    }
-
-    .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
-
-    .btn{
-      display:inline-block; padding:10px 12px; border-radius:12px;
-      border:1px solid var(--border); color:var(--text);
-      text-decoration:none; font-size:13px;
-      background: rgba(255,255,255,.55);
-    }
-
-    .btn.primary{
-      border-color: rgba(139,107,61,.55);
-      background: rgba(139,107,61,.12);
-    }
-
-    .error{
-      margin-top:10px;
-      color:#9b2c2c;
-      font-size:12px;
-    }
-
-    /* Fallback video (Play visible siempre) */
-    .videoFallback{
-      position:relative;
-      width:100%;
-      min-height: 320px;
-      border-radius: 12px;
-      overflow: hidden;
-      border:1px solid rgba(0,0,0,.12);
-      background: rgba(0,0,0,.08);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-    .videoFallback img{
-      width:100%;
-      height:100%;
-      object-fit: cover;
-      display:block;
-    }
-    .playBtn{
-      position:absolute;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-      background: rgba(0,0,0,.15);
-    }
-    .playBtn span{
-      width:64px;
-      height:64px;
-      border-radius:999px;
-      background: rgba(255,255,255,.92);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:22px;
-      border:1px solid rgba(0,0,0,.18);
-      box-shadow: 0 10px 30px rgba(0,0,0,.20);
-    }
-  </style>
+.footerNote{
+  margin-top:10px;
+  font-size:13px;
+  color:var(--muted);
+  display:flex;
+  gap:8px;
+}
+</style>
 </head>
 
 <body>
-  <div class="wrap">
-    <div class="masthead">
-      <div>
-        <div class="brand">NASA Daily • APOD</div>
-      </div>
-
-      <div class="rightTop">
-        <div class="langToggle" aria-label="Cambiar idioma">
-          <button id="btnES" class="flagBtn" title="Español" onclick="setLang('es')">
-            <img alt="ES" src="https://flagcdn.com/w20/es.png">
-          </button>
-
-          <button id="btnEN" class="flagBtn" title="English" onclick="setLang('en')">
-            <img alt="US" src="https://flagcdn.com/w20/us.png">
-          </button>
-        </div>
-
-        <div class="badge">
-          <div class="badgeTop">
-            <span id="labelDate">Fecha</span>: <b id="dateText">—</b>
-          </div>
-
-          <div class="badgeRow">
-            <input id="d" class="dateInput" type="date">
-            <button class="dateBtn" onclick="go()" id="btnView">Ver</button>
-          </div>
-
-          <div id="err" class="error"></div>
-        </div>
+<div class="wrap">
+  <div class="card">
+    <div class="hero">
+      <h1 id="title">Cargando…</h1>
+      <div class="meta">
+        <a id="nasaLink" href="#" target="_blank">Abrir en NASA</a>
       </div>
     </div>
 
-    <div class="card">
-      <div class="hero">
-        <h1 id="title">Cargando…</h1>
+    <div class="content">
+      <div class="figure" id="mediaBox"></div>
 
-        <div class="meta">
-          <span id="labelSource">Fuente oficial:</span>
-          <a id="nasaLink" href="#" target="_blank" rel="noopener noreferrer">Abrir en NASA</a>
+      <div class="copy">
+        <p id="explanation"></p>
+
+        <div class="actions">
+          <a id="resourceBtn" class="btn primary" href="#" target="_blank">
+            Ver recurso
+          </a>
         </div>
-      </div>
 
-      <div class="content">
-        <div class="figure" id="mediaBox"></div>
-
-        <div class="copy">
-          <p id="explanation"></p>
-
-          <div class="actions">
-            <a id="resourceBtn" class="btn primary" href="#" target="_blank" rel="noopener noreferrer">Ver recurso</a>
-          </div>
-
-          <div class="footer" id="footerHelp"></div>
-        </div>
+        <div id="footerHelp"></div>
       </div>
     </div>
   </div>
+</div>
 
-  <script>
-    let LANG = localStorage.getItem('lang') || 'en';
-    const tCache = new Map();
-    let ORIGINAL = null;
+<script>
+let ORIGINAL = null;
 
-    function setLang(l){
-      LANG = l;
-      localStorage.setItem('lang', l);
-      syncLangUI();
-      renderText();
-    }
-
-    function resolveExternalUrl(u){
-      if (!u) return '';
-      const s = String(u).trim();
-
-      // ya absoluta
-      if (s.startsWith('http://') || s.startsWith('https://')) return s;
-
-      // protocol-relative
-      if (s.startsWith('//')) return 'https:' + s;
-
-      // ruta relativa: /apod/ap260113.html  -> apod.nasa.gov + path
-      if (s.startsWith('/')) return 'https://apod.nasa.gov' + s;
-
-      // dominio sin protocolo: apod.nasa.gov/...
-      if (s.startsWith('apod.nasa.gov')) return 'https://' + s;
-
-      // www sin protocolo
-      if (s.startsWith('www.')) return 'https://' + s;
-
-      // fallback genérico
-      return 'https://' + s;
-    }
-
-    function openInNewTab(u){
-      const url = resolveExternalUrl(u);
-      if (!url) return;
-
-      const a = document.createElement('a');
-      a.href = url;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    }
-
-    function syncLangUI(){
-      document.getElementById('btnES').classList.toggle('active', LANG === 'es');
-      document.getElementById('btnEN').classList.toggle('active', LANG === 'en');
-
-      if (LANG === 'es'){
-        document.getElementById('labelDate').textContent = 'Fecha';
-        document.getElementById('btnView').textContent = 'Ver';
-        document.getElementById('labelSource').textContent = 'Fuente oficial:';
-      } else {
-        document.getElementById('labelDate').textContent = 'Date';
-        document.getElementById('btnView').textContent = 'View';
-        document.getElementById('labelSource').textContent = 'Official source:';
-      }
-    }
-
-    function go(){
-      const d = document.getElementById('d').value;
-      const u = new URL(window.location.href);
-      if (d) u.searchParams.set('date', d);
-      else u.searchParams.delete('date');
-      u.searchParams.set('t', Date.now().toString());
-      window.location.href = u.toString();
-    }
-
-    function getDateFromUrl(){
-      const u = new URL(window.location.href);
-      return u.searchParams.get('date') || '';
-    }
-
-    async function translateEnToEs(text){
-      const key = 'en->es|' + text;
-      if (tCache.has(key)) return tCache.get(key);
-
-      const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=es&dt=t&q='
-        + encodeURIComponent(text);
-
-      const r = await fetch(url);
-      const data = await r.json();
-      const out = (data?.[0] || []).map(x => x[0]).join('') || text;
-
-      tCache.set(key, out);
-      return out;
-    }
-
-    function toEmbedUrl(u){
-      if (!u) return u;
-      try {
-        const url = new URL(u);
-
-        // YouTube
-        if (url.hostname.includes('youtube.com') || url.hostname === 'youtu.be') {
-          let id = '';
-          if (url.hostname === 'youtu.be') id = url.pathname.replace('/', '');
-          else {
-            id = url.searchParams.get('v') || '';
-            if (!id && url.pathname.startsWith('/embed/')) id = url.pathname.split('/embed/')[1] || '';
-          }
-          if (id) return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&playsinline=1&rel=0`;
-        }
-
-        // Vimeo
-        if (url.hostname.includes('vimeo.com')) {
-          if (url.hostname.includes('player.vimeo.com')) {
-            const u2 = new URL(u);
-            u2.searchParams.set('autoplay','1');
-            u2.searchParams.set('muted','1');
-            return u2.toString();
-          }
-          const parts = url.pathname.split('/').filter(Boolean);
-          const id = parts.find(p => /^\d+$/.test(p));
-          if (id) return `https://player.vimeo.com/video/${id}?autoplay=1&muted=1`;
-        }
-
-        return u;
-      } catch {
-        return u;
-      }
-    }
-
-    function isDirectVideoUrl(u){
-      return typeof u === 'string' && /\.(mp4|webm|ogg)(\?|$)/i.test(u);
-    }
-
-    function apodNasaPageFromDate(dateStr){
-      // dateStr: "YYYY-MM-DD"
-      if (!dateStr) return 'https://apod.nasa.gov/apod/astropix.html';
-      const [yyyy, mm, dd] = String(dateStr).split('-');
-      if (!yyyy || !mm || !dd) return 'https://apod.nasa.gov/apod/astropix.html';
-      const yy = yyyy.slice(-2);
-      return `https://apod.nasa.gov/apod/ap${yy}${mm}${dd}.html`;
-    }
-
-    function getBestAssetUrl(apod){
-      if (!apod) return '';
-      const type = (apod.media_type || '').toLowerCase();
-      if (type === 'image') return apod.hdurl || apod.url || '';
-      // video/other: lo mejor es abrir el url original (YouTube/Vimeo/NASA etc.)
-      return apod.url || '';
-    }
-
-    function renderMedia(){
-      if (!ORIGINAL) return;
-
-      const mediaBox = document.getElementById('mediaBox');
-      mediaBox.innerHTML = '';
-
-      const type = (ORIGINAL.media_type || '').toLowerCase();
-      const src = ORIGINAL.url;
-
-      // IMAGEN
-      if (type === 'image') {
-        const img = document.createElement('img');
-        img.src = ORIGINAL.hdurl || ORIGINAL.url;
-        img.alt = ORIGINAL.title || '';
-        mediaBox.appendChild(img);
-        return;
-      }
-
-      // VIDEO DIRECTO (mp4/webm/ogg)
-      if (isDirectVideoUrl(src)) {
-        const v = document.createElement('video');
-        v.src = src;
-        v.controls = true;
-        v.autoplay = true;
-        v.muted = true;
-        v.playsInline = true;
-        mediaBox.appendChild(v);
-        return;
-      }
-
-      // OTHER o VIDEO NO DIRECTO: mostramos fallback con Play y abrimos el recurso original
-      const wrapper = document.createElement('div');
-      wrapper.className = 'videoFallback';
-
-      if (ORIGINAL.thumbnail_url) {
-        const img = document.createElement('img');
-        img.src = ORIGINAL.thumbnail_url;
-        img.alt = ORIGINAL.title || 'Recurso';
-        wrapper.appendChild(img);
-      }
-
-      const play = document.createElement('div');
-      play.className = 'playBtn';
-      play.innerHTML = '<span>▶</span>';
-      wrapper.appendChild(play);
-
-      play.addEventListener('click', () => {
-        openInNewTab(getBestAssetUrl(ORIGINAL));
-      });
-
-      mediaBox.appendChild(wrapper);
-
-      // Mensaje claro debajo del cuadro
-      const hint = document.createElement('div');
-      hint.className = 'error';
-      hint.style.opacity = '0.75';
-      hint.style.marginTop = '8px';
-      hint.textContent = (LANG === 'es')
-        ? 'Este contenido se abre en una nueva pestaña por restricciones del proveedor.'
-        : 'This content opens in a new tab due to provider restrictions.';
-      mediaBox.appendChild(hint);
-    }
-
-    async function renderText(){
-      if (!ORIGINAL) return;
-
-      // Fecha en el badge
-      document.getElementById('dateText').textContent = ORIGINAL.date || '—';
-
-      const nasaPage = apodNasaPageFromDate(ORIGINAL.date);
-      const asset = getBestAssetUrl(ORIGINAL);
-
-      const nasaLinkEl = document.getElementById('nasaLink');
-      const resourceBtnEl = document.getElementById('resourceBtn');
-
-      // hrefs (accesible + fallback)
-      nasaLinkEl.href = nasaPage;
-      resourceBtnEl.href = asset || '#';
-
-      // forzamos apertura en nueva pestaña de forma consistente
-      nasaLinkEl.onclick = (e) => {
-        e.preventDefault();
-        openInNewTab(nasaPage);
-      };
-resourceBtnEl.href = asset || '#';
-
-const isVideo = (ORIGINAL.media_type || '').toLowerCase() === 'video';
-
-resourceBtnEl.textContent = isVideo
-  ? (LANG === 'es' ? 'Ver video externo ▶️' : 'Open external video ▶️')
-  : (LANG === 'es' ? 'Ver recurso' : 'View resource');
-
-resourceBtnEl.onclick = (e) => {
-  e.preventDefault();
-  if (!asset) return;
-  openInNewTab(asset);
-};
-
-
-      let title = ORIGINAL.title || '—';
-      let explanation = ORIGINAL.explanation || '';
-
-      if (LANG === 'es') {
-        try {
-          title = await translateEnToEs(title);
-          explanation = await translateEnToEs(explanation);
-        } catch (_) {}
-      }
-
-      document.getElementById('title').textContent = title;
-      document.getElementById('explanation').textContent = explanation;
-    }
-
-    async function load(){
-      syncLangUI();
-
-      const date = getDateFromUrl();
-      document.getElementById('d').value = date || '';
-
-      const apiUrl = new URL('/api/apod', window.location.origin);
-      if (date) apiUrl.searchParams.set('date', date);
-
-      const errBox = document.getElementById('err');
-      errBox.textContent = '';
-
-      try {
-        const r = await fetch(apiUrl.toString(), { cache: 'no-store' });
-        const data = await r.json();
-
-        if (!r.ok || data?.error) {
-          errBox.textContent = (LANG === 'es')
-            ? (data?.error || 'Error consultando la API')
-            : (data?.error || 'Error fetching the API');
-          document.getElementById('title').textContent = 'Error';
-          return;
-        }
-
-        ORIGINAL = data;
-
-        renderMedia();
-        await renderText();
-      } catch (e) {
-        errBox.textContent = (LANG === 'es')
-          ? 'No se pudo cargar APOD (error de red)'
-          : 'Could not load APOD (network error)';
-        document.getElementById('title').textContent = 'Error';
-      }
-      const footer = document.getElementById('footerHelp');
-footer.innerHTML = '';
-
-if ((ORIGINAL.media_type || '').toLowerCase() === 'video') {
-  footer.innerHTML = `
-    <div style="
-      margin-top:10px;
-      font-size:13px;
-      color:var(--muted);
-      display:flex;
-      gap:8px;
-      align-items:flex-start;
-    ">
-      <span style="font-size:16px;">🔒</span>
-      <span>
-        ${LANG === 'es'
-          ? 'Este video no puede reproducirse aquí por restricciones del proveedor. Se abrirá en una nueva pestaña.'
-          : 'This video cannot be played inline due to provider restrictions. It will open in a new tab.'}
-      </span>
-    </div>
-  `;
+function openInNewTab(url){
+  if(!url) return;
+  const a=document.createElement('a');
+  a.href=url;
+  a.target='_blank';
+  a.rel='noopener noreferrer';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
 }
 
-    }
+function apodNasaPage(date){
+  if(!date) return 'https://apod.nasa.gov/apod/astropix.html';
+  const [y,m,d]=date.split('-');
+  return `https://apod.nasa.gov/apod/ap${y.slice(-2)}${m}${d}.html`;
+}
 
-    load();
-  </script>
+function getAsset(apod){
+  if(!apod) return '';
+  if(apod.media_type==='image') return apod.hdurl||apod.url;
+  return apod.url;
+}
+
+function renderMedia(){
+  const box=document.getElementById('mediaBox');
+  box.innerHTML='';
+
+  if(ORIGINAL.media_type==='image'){
+    const img=document.createElement('img');
+    img.src=ORIGINAL.hdurl||ORIGINAL.url;
+    box.appendChild(img);
+    return;
+  }
+
+  // video u other
+  const wrap=document.createElement('div');
+  wrap.className='videoFallback';
+
+  const play=document.createElement('div');
+  play.className='playBtn';
+  play.innerHTML='<span>▶️</span>';
+  play.onclick=()=>openInNewTab(getAsset(ORIGINAL));
+
+  wrap.appendChild(play);
+  box.appendChild(wrap);
+}
+
+function renderText(){
+  document.getElementById('title').textContent=ORIGINAL.title;
+  document.getElementById('explanation').textContent=ORIGINAL.explanation;
+
+  const asset=getAsset(ORIGINAL);
+  const nasa=apodNasaPage(ORIGINAL.date);
+
+  const btn=document.getElementById('resourceBtn');
+  const nasaLink=document.getElementById('nasaLink');
+  const footer=document.getElementById('footerHelp');
+
+  nasaLink.href=nasa;
+  btn.href=asset;
+
+  const isExternal = ORIGINAL.media_type!=='image';
+
+  btn.textContent = isExternal
+    ? 'Ver video externo ▶️'
+    : 'Ver recurso';
+
+  btn.onclick=(e)=>{
+    e.preventDefault();
+    openInNewTab(asset);
+  };
+
+  footer.innerHTML = isExternal ? `
+    <div class="footerNote">
+      <span>🔒</span>
+      <span>
+        Este contenido no puede reproducirse aquí por restricciones del proveedor.
+        Se abrirá en una nueva pestaña.
+      </span>
+    </div>
+  ` : '';
+}
+
+async function load(){
+  const r=await fetch('/api/apod',{cache:'no-store'});
+  const data=await r.json();
+  ORIGINAL=data;
+  renderMedia();
+  renderText();
+}
+
+load();
+</script>
 </body>
 </html>
