@@ -3,6 +3,24 @@ export default async function handler(req, res) {
   try {
     const apiKey = process.env.NASA_API_KEY;
     if (!apiKey) return res.status(500).json({ error: "Falta NASA_API_KEY" });
+const TAGS = {
+  moon: ["moon", "lunar", "crater", "craters", "selene", "luna", "lunas"],
+  mars: ["mars", "martian", "marte"],
+  jupiter: ["jupiter", "júpiter"],
+  saturn: ["saturn", "saturno", "rings", "anillos"],
+  eclipse: ["eclipse", "eclipses", "eclipse lunar", "solar eclipse"],
+  galaxy: ["galaxy", "galaxies", "galaxia", "galaxias", "milky way", "via lactea", "vía láctea"],
+  nebula: ["nebula", "nebulosa", "nebulas", "nebulosas"],
+  earth: ["earth", "tierra", "iss", "space station", "estacion espacial", "estación espacial"],
+  comet: ["comet", "cometa", "asteroid", "asteroide", "meteor", "meteoro"]
+};
+
+function detectTagFromQuery(qNorm) {
+  for (const [tag, keys] of Object.entries(TAGS)) {
+    if (keys.some(k => qNorm.includes(normalize(k)))) return tag;
+  }
+  return "";
+}
 
     const qRaw = (req.query.q || "").toString().trim();
     const tagRaw = (req.query.tag || "").toString().trim();
@@ -45,7 +63,11 @@ export default async function handler(req, res) {
       .filter(x => {
         const text = normalize(`${x.title || ""} ${x.explanation || ""}`);
 
-        if (tag) return matchesTag(text, tag);
+       if (tag) {
+  const keys = TAGS[tag] || [];
+  return keys.some(k => text.includes(normalize(k)));
+}
+
 
         if (!q) return true;
         // búsqueda simple: split en tokens y que matchee al menos uno
@@ -76,6 +98,11 @@ function normalize(s) {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, ""); // sin acentos
 }
+let tag = normalize(tagRaw);
+const q = normalize(qRaw);
+
+if (!tag && q) tag = detectTagFromQuery(q);
+
 
 // mapping básico: podés expandir
 function matchesTag(text, tag) {
