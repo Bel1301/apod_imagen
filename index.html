@@ -517,12 +517,20 @@
         e.preventDefault();
         openInNewTab(nasaPage);
       };
+resourceBtnEl.href = asset || '#';
 
-      resourceBtnEl.onclick = (e) => {
-        e.preventDefault();
-        if (!asset) return;
-        openInNewTab(asset);
-      };
+const isVideo = (ORIGINAL.media_type || '').toLowerCase() === 'video';
+
+resourceBtnEl.textContent = isVideo
+  ? (LANG === 'es' ? 'Ver video externo ▶️' : 'Open external video ▶️')
+  : (LANG === 'es' ? 'Ver recurso' : 'View resource');
+
+resourceBtnEl.onclick = (e) => {
+  e.preventDefault();
+  if (!asset) return;
+  openInNewTab(asset);
+};
+
 
       let title = ORIGINAL.title || '—';
       let explanation = ORIGINAL.explanation || '';
@@ -572,6 +580,29 @@
           : 'Could not load APOD (network error)';
         document.getElementById('title').textContent = 'Error';
       }
+      const footer = document.getElementById('footerHelp');
+footer.innerHTML = '';
+
+if ((ORIGINAL.media_type || '').toLowerCase() === 'video') {
+  footer.innerHTML = `
+    <div style="
+      margin-top:10px;
+      font-size:13px;
+      color:var(--muted);
+      display:flex;
+      gap:8px;
+      align-items:flex-start;
+    ">
+      <span style="font-size:16px;">🔒</span>
+      <span>
+        ${LANG === 'es'
+          ? 'Este video no puede reproducirse aquí por restricciones del proveedor. Se abrirá en una nueva pestaña.'
+          : 'This video cannot be played inline due to provider restrictions. It will open in a new tab.'}
+      </span>
+    </div>
+  `;
+}
+
     }
 
     load();
