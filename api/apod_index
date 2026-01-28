@@ -1,1 +1,38 @@
+import fs from 'fs';
+import path from 'path';
+
+function norm(s){
+  return (s || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+
+export default function handler(req, res){
+  try{
+    const { tag = '', q = '', limit = '12' } = req.query;
+    const lim = Math.max(1, Math.min(48, parseInt(limit, 10) || 12));
+
+    const p = path.join(process.cwd(), 'api', 'apod_index');
+    const raw = fs.readFileSync(p, 'utf-8');
+    const all = JSON.parse(raw);
+
+    let items = all;
+
+    if (tag){
+      const t = norm(tag);
+      items = items.filter(it => (it.tags || []).some(x => norm(x) === t));
+    } else if (q){
+      const qq = norm(q);
+      items = items.filter(it => {
+        const hay = norm(`${it.title || ''} ${it.explanation || ''}`);
+        return hay.includes(qq);
+      });
+    }
+
+    // recientes primero (por date desc)
+    items.sort((a,b) => (b.date || '').localeCompare(a.date || ''));
+
+    return res.status(200).json({ items: items.slice(0, lim) });
+  } catch (e){
+    return res.status(500).json({ error: 'No se pudo leer el índice' });
+  }
+}
 
