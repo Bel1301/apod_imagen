@@ -60,28 +60,42 @@ function detectTagFromQuery(qNorm) {
         hdurl: x.hdurl,
         thumbnail_url: x.thumbnail_url
       }))
-      .filter(x => {
-        const text = normalize(`${x.title || ""} ${x.explanation || ""}`);
+let tag = normalize(tagRaw);
+const q = normalize(qRaw);
 
-       if (tag) {
-  const keys = TAGS[tag] || [];
-  return keys.some(k => text.includes(normalize(k)));
+// si no vino tag explícito, lo detectamos desde la query
+if (!tag && q) {
+  tag = detectTagFromQuery(q); // "lunas" => "moon"
 }
 
+  .filter(x => {
+  const text = normalize(`${x.title || ""} ${x.explanation || ""}`);
 
-        if (!q) return true;
-        // búsqueda simple: split en tokens y que matchee al menos uno
-        const tokens = q.split(/\s+/).filter(Boolean);
-        return tokens.some(t => text.includes(t));
-      })
-      .sort((a, b) => (b.date || "").localeCompare(a.date || ""))
-      .slice(0, limit);
-
-    return res.status(200).json({ items, days });
-  } catch (e) {
-    return res.status(500).json({ error: "Error interno en /api/gallery" });
+  // 👉 PRIORIDAD 1: búsqueda por tag
+  if (tag) {
+    const keys = TAGS[tag] || [];
+    return keys.some(k => text.includes(normalize(k)));
   }
+
+  // 👉 PRIORIDAD 2: búsqueda libre por texto
+  if (q) {
+    return q.split(/\s+/).some(t => text.includes(t));
+  }
+
+  // 👉 sin filtros → incluir todo
+  return true;
+})
+
 }
+function detectTagFromQuery(qNorm) {
+  for (const [tag, keys] of Object.entries(TAGS)) {
+    if (keys.some(k => qNorm.includes(normalize(k)))) {
+      return tag;
+    }
+  }
+  return "";
+}
+
 
 function ymd(d) {
   const yyyy = d.getFullYear();
