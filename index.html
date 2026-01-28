@@ -322,6 +322,132 @@
       </div>
     </div>
   </div>
+function normalize(s){
+  return (s || '')
+    .toString()
+    .trim()
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,''); // saca acentos
+}
+
+function mapQueryToTag(q){
+  const x = normalize(q);
+
+  const dict = [
+    { tag: 'Moon', keys: ['luna','lunas','moon','lunar','selene','crater','crateres'] },
+    { tag: 'Mars', keys: ['marte','mars'] },
+    { tag: 'Jupiter', keys: ['jupiter','júpiter'] },
+    { tag: 'Saturn', keys: ['saturno','saturn','anillos','rings'] },
+    { tag: 'Eclipse', keys: ['eclipse','eclipses'] },
+    { tag: 'Galaxy', keys: ['galaxia','galaxias','galaxy','galaxies'] },
+    { tag: 'Nebula', keys: ['nebula','nebulosa','nebulosas'] },
+    { tag: 'Earth', keys: ['tierra','earth','iss','estacion espacial','space station'] },
+    { tag: 'Comet', keys: ['cometa','comet','asteroide','asteroid','meteor','meteoro'] },
+  ];
+
+  for (const d of dict){
+    if (d.keys.some(k => x.includes(normalize(k)))) return d.tag;
+  }
+  return ''; // sin match → podés caer a búsqueda por texto
+}
+
+function pickThumb(item){
+  // thumb preferido: thumbnail_url (videos) o url/hdurl (imágenes)
+  return item.thumbnail_url || item.hdurl || item.url || '';
+}
+
+function apodNasaPageFromDate(dateStr){
+  if (!dateStr) return 'https://apod.nasa.gov/apod/astropix.html';
+  const [yyyy, mm, dd] = String(dateStr).split('-');
+  const yy = yyyy?.slice(-2);
+  if (!yy || !mm || !dd) return 'https://apod.nasa.gov/apod/astropix.html';
+  return `https://apod.nasa.gov/apod/ap${yy}${mm}${dd}.html`;
+}
+
+function renderGallery(items, label){
+  const wrap = document.getElementById('galleryWrap');
+  const grid = document.getElementById('galleryGrid');
+  const title = document.getElementById('galleryTitle');
+  const hint = document.getElementById('galleryHint');
+
+  wrap.style.display = 'block';
+  grid.innerHTML = '';
+
+  title.textContent = (LANG === 'es')
+    ? `Resultados: ${label}`
+    : `Results: ${label}`;
+
+  hint.textContent = (LANG === 'es')
+    ? `${items.length} resultados`
+    : `${items.length} results`;
+
+  for (const it of items){
+    const thumb = pickThumb(it);
+    const nasaPage = apodNasaPageFromDate(it.date);
+    const asset = (it.media_type === 'image') ? (it.hdurl || it.url) : it.url;
+
+    const card = document.createElement('div');
+    card.style.border = '1px solid rgba(0,0,0,.12)';
+    card.style.borderRadius = '14px';
+    card.style.overflow = 'hidden';
+    card.style.background = 'rgba(255,255,255,.45)';
+
+    card.innerHTML = `
+      <div style="aspect-ratio: 4/3; background:rgba(0,0,0,.06); display:flex; align-items:center; justify-content:center;">
+        ${thumb ? `<img src="${thumb}" alt="" style="width:100%; height:100%; object-fit:cover; display:block;">`
+                : `<div style="padding:18px; color:var(--muted); font-size:13px;">Sin preview</div>`}
+      </div>
+      <div style="padding:10px 10px 12px;">
+        <div style="font-weight:700; font-size:13px; line-height:1.25; margin-bottom:6px;">
+          ${it.title || '—'}
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <a class="btn" href="#" style="padding:8px 10px;" data-asset>Ver recurso</a>
+          <a class="btn" href="#" style="padding:8px 10px;" data-nasa>Abrir NASA</a>
+        </div>
+      </div>
+    `;
+
+    card.querySelector('[data-asset]').onclick = (e) => {
+      e.preventDefault();
+      openInNewTab(asset);
+    };
+    card.querySelector('[data-nasa]').onclick = (e) => {
+      e.preventDefault();
+      openInNewTab(nasaPage);
+    };
+
+    grid.appendChild(card);
+  }
+}
+
+async function runSearch(){
+  const q = document.getElementById('q').value;
+  const tag = mapQueryToTag(q);
+  const label = tag || q || (LANG === 'es' ? 'todo' : 'all');
+
+  // MVP: endpoint /api/gallery?tag=Moon&limit=12
+  const url = new URL('/api/gallery', window.location.origin);
+  if (tag) url.searchParams.set('tag', tag);
+  else url.searchParams.set('q', q);
+  url.searchParams.set('limit', '12');
+
+  const r = await fetch(url.toString(), { cache: 'no-store' });
+  const data = await r.json();
+
+  if (!r.ok || data?.error){
+    // si querés, renderizá error en #err o en galleryHint
+    document.getElementById('err').textContent = data?.error || 'Error buscando';
+    return;
+  }
+
+  renderGallery(data.items || [], label);
+}
+
+// Bonus: enter para buscar
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && document.activeElement?.id === 'q') runSearch();
+});
 
 <script>
   let LANG = localStorage.getItem('lang') || 'en';
