@@ -703,27 +703,26 @@ function renderGallery(items, label){
 }
 
 async function runSearch(){
-  const q = document.getElementById('q').value;
+  const q = document.getElementById('q').value || '';
   const tag = mapQueryToTag(q);
-  const label = tag || q || (LANG === 'es' ? 'todo' : 'all');
 
-  // MVP: endpoint /api/gallery?tag=Moon&limit=12
   const url = new URL('/api/gallery', window.location.origin);
+  url.searchParams.set('limit', '12');
+  url.searchParams.set('days', '90'); // probá 60/90
   if (tag) url.searchParams.set('tag', tag);
   else url.searchParams.set('q', q);
-  url.searchParams.set('limit', '12');
 
   const r = await fetch(url.toString(), { cache: 'no-store' });
   const data = await r.json();
 
   if (!r.ok || data?.error){
-    // si querés, renderizá error en #err o en galleryHint
     document.getElementById('err').textContent = data?.error || 'Error buscando';
     return;
   }
 
-  renderGallery(data.items || [], label);
+  renderGallery(data.items || [], tag ? q : q);
 }
+
 
 // Bonus: enter para buscar
 document.addEventListener('keydown', (e) => {
