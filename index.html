@@ -4,6 +4,16 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>NASA Daily • APOD</title>
+<div style="margin-top:10px; display:flex; gap:10px; align-items:center;">
+  <div style="position:relative; width:min(520px, 72vw);">
+    <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); opacity:.65;">🔎</span>
+    <input id="q" type="search" placeholder="Buscar: lunas, marte, galaxias..."
+      style="width:100%; padding:10px 12px 10px 38px; border-radius:999px;
+             border:1px solid rgba(0,0,0,.18); background:rgba(255,255,255,.75);
+             outline:none; color:var(--text);" />
+  </div>
+  <button class="dateBtn" onclick="runSearch()" id="btnSearch">Buscar</button>
+</div>
 
  <style>
   :root{
@@ -234,6 +244,23 @@
     gap:8px;
     align-items:flex-start;
   }
+   <div id="galleryWrap" style="max-width:980px; margin:18px auto 0; display:none;">
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin:10px 0;">
+    <div id="galleryTitle" style="font-weight:700; color:var(--text);">Resultados</div>
+    <div id="galleryHint" style="font-size:13px; color:var(--muted);"></div>
+  </div>
+
+  <div id="galleryGrid" style="
+      display:grid; grid-template-columns:repeat(4, 1fr); gap:12px;">
+  </div>
+</div>
+
+<style>
+@media (max-width: 900px){
+  #galleryGrid{ grid-template-columns:repeat(2, 1fr) !important; }
+}
+</style>
+
 </style>
 </head>
 
