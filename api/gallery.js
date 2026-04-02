@@ -22,16 +22,17 @@ module.exports = async function handler(req, res) {
 
   const end   = new Date();
   const start = new Date();
-  start.setFullYear(start.getFullYear() - 1);
+  start.setDate(start.getDate() - 30);
   const fmt = d => d.toISOString().split('T')[0];
 
   try {
-    const url = `https://api.nasa.gov/planetary/apod?api_key=${NASA_KEY}&start_date=${fmt(start)}&end_date=${fmt(end)}&thumbs=true`;
-    const data = await httpsGet(url);
-
-    if (!Array.isArray(data)) {
-      return res.status(502).json({ error: 'NASA API error', detail: data });
-    }
+   const url = `https://api.nasa.gov/planetary/apod?api_key=${NASA_KEY}&start_date=${fmt(start)}&end_date=${fmt(end)}&thumbs=true`;
+console.log('Fetching:', url.replace(NASA_KEY, 'KEY_HIDDEN'));
+const data = await httpsGet(url);
+if (!Array.isArray(data)) {
+  console.error('NASA error response:', JSON.stringify(data));
+  return res.status(502).json({ error: 'NASA API error', detail: data });
+}
 
     let items = q
       ? data.filter(item => `${item.title} ${item.explanation}`.toLowerCase().includes(q))
