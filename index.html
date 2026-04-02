@@ -4,22 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>NASA Daily • APOD</title>
-<div style="margin-top:10px; display:flex; gap:10px; align-items:center;">
-  <div style="position:relative; width:min(520px, 72vw);">
-    <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); opacity:.65;">🔎</span>
-    <input id="q" type="search" placeholder="Buscar: lunas, marte, galaxias..."
-      style="width:100%; padding:10px 12px 10px 38px; border-radius:999px;
-             border:1px solid rgba(0,0,0,.18); background:rgba(255,255,255,.75);
-             outline:none; color:var(--text);" />
-  </div>
-  <button class="dateBtn" onclick="runSearch()" id="btnSearch">Buscar</button>
-</div>
 
- <style>
+  <style>
   :root{
     --bg:#f6f1e7;
     --bg2:#efe7d8;
-
     --text:#2b2b2b;
     --muted:#6b6b6b;
     --accent:#8b6b3d;
@@ -66,10 +55,7 @@
     padding:0;
   }
   .flagBtn img{
-    width:20px;
-    height:14px;
-    border-radius:3px;
-    display:block;
+    width:20px; height:14px; border-radius:3px; display:block;
   }
   .flagBtn.active{
     outline:2px solid rgba(139,107,61,.35);
@@ -105,6 +91,32 @@
     background:rgba(139,107,61,.12);
     color:var(--text);
     cursor:pointer;
+    font-size:14px;
+  }
+  .dateBtn:hover{ background:rgba(139,107,61,.22); }
+
+  /* Buscador */
+  .searchRow{
+    display:flex; gap:10px; align-items:center; margin-top:10px; margin-bottom:18px;
+  }
+  .searchWrap{
+    position:relative; width:min(520px, 72vw);
+  }
+  .searchIcon{
+    position:absolute; left:12px; top:50%; transform:translateY(-50%); opacity:.65; pointer-events:none;
+  }
+  .searchInput{
+    width:100%; padding:10px 12px 10px 38px;
+    border-radius:999px;
+    border:1px solid rgba(0,0,0,.18);
+    background:rgba(255,255,255,.75);
+    outline:none; color:var(--text);
+    font-size:14px;
+    box-sizing:border-box;
+  }
+  .searchInput:focus{
+    border-color: rgba(139,107,61,.55);
+    background:rgba(255,255,255,.95);
   }
 
   .card{
@@ -142,18 +154,9 @@
     justify-content:center;
     flex-direction:column;
   }
-
-  .figure img{
-    width:100%;
-    height:auto;
-    display:block;
-  }
-
+  .figure img{ width:100%; height:auto; display:block; }
   .figure iframe, .figure video{
-    width:100%;
-    height:520px;
-    border:0;
-    display:block;
+    width:100%; height:520px; border:0; display:block;
   }
   @media (max-width: 900px){
     .figure iframe, .figure video{ height:260px; }
@@ -165,13 +168,8 @@
     padding:16px;
     background: rgba(255,255,255,.45);
   }
-
   .copy p{
-    margin:0;
-    color:var(--text);
-    line-height:1.55;
-    font-size:15px;
-    white-space: pre-wrap;
+    margin:0; color:var(--text); line-height:1.55; font-size:15px; white-space: pre-wrap;
   }
 
   .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
@@ -181,87 +179,111 @@
     border:1px solid var(--border); color:var(--text);
     text-decoration:none; font-size:13px;
     background: rgba(255,255,255,.55);
+    cursor:pointer;
   }
-
   .btn.primary{
     border-color: rgba(139,107,61,.55);
     background: rgba(139,107,61,.12);
   }
+  .btn:hover{ background: rgba(255,255,255,.85); }
 
   .error{
-    margin-top:10px;
-    color:#9b2c2c;
-    font-size:12px;
+    margin-top:10px; color:#9b2c2c; font-size:12px;
   }
 
-  /* Fallback video */
   .videoFallback{
-    position:relative;
-    width:100%;
-    min-height: 320px;
-    border-radius: 12px;
-    overflow: hidden;
+    position:relative; width:100%; min-height: 320px;
+    border-radius: 12px; overflow: hidden;
     border:1px solid rgba(0,0,0,.12);
     background: rgba(0,0,0,.08);
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    display:flex; align-items:center; justify-content:center;
   }
-  .videoFallback img{
-    width:100%;
-    height:100%;
-    object-fit: cover;
-    display:block;
-  }
+  .videoFallback img{ width:100%; height:100%; object-fit: cover; display:block; }
   .playBtn{
-    position:absolute;
-    inset:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    cursor:pointer;
-    background: rgba(0,0,0,.15);
+    position:absolute; inset:0; display:flex;
+    align-items:center; justify-content:center;
+    cursor:pointer; background: rgba(0,0,0,.15);
   }
   .playBtn span{
-    width:64px;
-    height:64px;
-    border-radius:999px;
+    width:64px; height:64px; border-radius:999px;
     background: rgba(255,255,255,.92);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:22px;
-    border:1px solid rgba(0,0,0,.18);
+    display:flex; align-items:center; justify-content:center;
+    font-size:22px; border:1px solid rgba(0,0,0,.18);
     box-shadow: 0 10px 30px rgba(0,0,0,.20);
   }
 
-  /* Nota amigable */
   .note{
-    margin-top:10px;
-    font-size:13px;
-    color:var(--muted);
-    display:flex;
-    gap:8px;
-    align-items:flex-start;
+    margin-top:10px; font-size:13px; color:var(--muted);
+    display:flex; gap:8px; align-items:flex-start;
   }
-   <div id="galleryWrap" style="max-width:980px; margin:18px auto 0; display:none;">
-  <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin:10px 0;">
-    <div id="galleryTitle" style="font-weight:700; color:var(--text);">Resultados</div>
-    <div id="galleryHint" style="font-size:13px; color:var(--muted);"></div>
-  </div>
 
-  <div id="galleryGrid" style="
-      display:grid; grid-template-columns:repeat(4, 1fr); gap:12px;">
-  </div>
-</div>
+  /* ── Galería de resultados ── */
+  #galleryWrap{
+    max-width:980px; margin: 24px auto 0;
+  }
+  .galleryHeader{
+    display:flex; justify-content:space-between; align-items:center;
+    gap:10px; margin-bottom:14px;
+  }
+  #galleryTitle{ font-weight:700; font-size:16px; color:var(--text); }
+  #galleryHint{ font-size:13px; color:var(--muted); }
 
-<style>
-@media (max-width: 900px){
-  #galleryGrid{ grid-template-columns:repeat(2, 1fr) !important; }
-}
-</style>
+  #galleryGrid{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap:12px;
+  }
+  @media (max-width:900px){
+    #galleryGrid{ grid-template-columns: repeat(2, 1fr); }
+  }
 
-</style>
+  .galleryCard{
+    border:1px solid var(--border);
+    border-radius:14px;
+    overflow:hidden;
+    background: rgba(255,255,255,.45);
+    transition: box-shadow .2s, transform .2s;
+  }
+  .galleryCard:hover{
+    box-shadow: 0 8px 24px rgba(0,0,0,.14);
+    transform: translateY(-2px);
+  }
+  .galleryThumb{
+    aspect-ratio: 4/3;
+    background:rgba(0,0,0,.06);
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
+  .galleryThumb img{
+    width:100%; height:100%; object-fit:cover; display:block;
+  }
+  .galleryInfo{
+    padding:10px 10px 12px;
+  }
+  .galleryCardTitle{
+    font-weight:700; font-size:13px; line-height:1.3;
+    margin-bottom:4px; color:var(--text);
+  }
+  .galleryDate{
+    font-size:12px; color:var(--muted); margin-bottom:8px;
+  }
+  .galleryActions{
+    display:flex; gap:6px; flex-wrap:wrap;
+  }
+  .galleryActions .btn{
+    padding:6px 10px; font-size:12px;
+  }
+
+  /* Loading spinner en galería */
+  #galleryLoading{
+    text-align:center; padding:32px; color:var(--muted); font-size:14px;
+  }
+
+  .noResults{
+    text-align:center; padding:32px; color:var(--muted); font-size:14px;
+    grid-column: 1/-1;
+  }
+  </style>
 </head>
 
 <body>
@@ -276,7 +298,6 @@
           <button id="btnES" class="flagBtn" title="Español" onclick="setLang('es')">
             <img alt="ES" src="https://flagcdn.com/w20/es.png">
           </button>
-
           <button id="btnEN" class="flagBtn" title="English" onclick="setLang('en')">
             <img alt="US" src="https://flagcdn.com/w20/us.png">
           </button>
@@ -286,42 +307,57 @@
           <div class="badgeTop">
             <span id="labelDate">Fecha</span>: <b id="dateText">—</b>
           </div>
-
           <div class="badgeRow">
             <input id="d" class="dateInput" type="date">
             <button class="dateBtn" onclick="go()" id="btnView">Ver</button>
           </div>
-
           <div id="err" class="error"></div>
         </div>
       </div>
     </div>
 
-    <div class="card">
+    <!-- Buscador -->
+    <div class="searchRow">
+      <div class="searchWrap">
+        <span class="searchIcon">🔎</span>
+        <input id="q" class="searchInput" type="search"
+          placeholder="Buscar: luna, marte, galaxia, nebulosa…" />
+      </div>
+      <button class="dateBtn" onclick="runSearch()" id="btnSearch">Buscar</button>
+    </div>
+
+    <!-- Tarjeta principal APOD -->
+    <div class="card" id="apodCard">
       <div class="hero">
         <h1 id="title">Cargando…</h1>
-
         <div class="meta">
           <span id="labelSource">Fuente oficial:</span>
           <a id="nasaLink" href="#" target="_blank" rel="noopener noreferrer">Abrir en NASA</a>
         </div>
       </div>
-
       <div class="content">
         <div class="figure" id="mediaBox"></div>
-
         <div class="copy">
           <p id="explanation"></p>
-
           <div class="actions">
             <a id="resourceBtn" class="btn primary" href="#" target="_blank" rel="noopener noreferrer">Ver recurso</a>
           </div>
-
           <div class="footer" id="footerHelp"></div>
         </div>
       </div>
     </div>
-  </div>
+
+    <!-- Galería de resultados de búsqueda -->
+    <div id="galleryWrap" style="display:none;">
+      <div class="galleryHeader">
+        <div id="galleryTitle">Resultados</div>
+        <div id="galleryHint"></div>
+      </div>
+      <div id="galleryLoading" style="display:none;">Buscando…</div>
+      <div id="galleryGrid"></div>
+    </div>
+
+  </div><!-- /wrap -->
 
 
 <script>
@@ -329,54 +365,49 @@
   const tCache = new Map();
   let ORIGINAL = null;
 
+  // ── Utilidades ──────────────────────────────────────────────
   function setLang(l){
     LANG = l;
     localStorage.setItem('lang', l);
     syncLangUI();
     renderText();
-    renderMedia(); // para que el hint del video cambie también
+    renderMedia();
   }
 
   function resolveExternalUrl(u){
     if (!u) return '';
     const s = String(u).trim();
-
     if (s.startsWith('http://') || s.startsWith('https://')) return s;
     if (s.startsWith('//')) return 'https:' + s;
     if (s.startsWith('/')) return 'https://apod.nasa.gov' + s;
-    if (s.startsWith('apod.nasa.gov')) return 'https://' + s;
-    if (s.startsWith('www.')) return 'https://' + s;
-
     return 'https://' + s;
   }
 
   function openInNewTab(u){
     const url = resolveExternalUrl(u);
     if (!url) return;
-
     const a = document.createElement('a');
-    a.href = url;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+    document.body.appendChild(a); a.click(); a.remove();
   }
 
   function syncLangUI(){
     document.getElementById('btnES').classList.toggle('active', LANG === 'es');
     document.getElementById('btnEN').classList.toggle('active', LANG === 'en');
-
     if (LANG === 'es'){
       document.getElementById('labelDate').textContent = 'Fecha';
       document.getElementById('btnView').textContent = 'Ver';
+      document.getElementById('btnSearch').textContent = 'Buscar';
       document.getElementById('labelSource').textContent = 'Fuente oficial:';
       document.getElementById('nasaLink').textContent = 'Abrir en NASA';
+      document.getElementById('q').placeholder = 'Buscar: luna, marte, galaxia, nebulosa…';
     } else {
       document.getElementById('labelDate').textContent = 'Date';
       document.getElementById('btnView').textContent = 'View';
+      document.getElementById('btnSearch').textContent = 'Search';
       document.getElementById('labelSource').textContent = 'Official source:';
       document.getElementById('nasaLink').textContent = 'Open on NASA';
+      document.getElementById('q').placeholder = 'Search: moon, mars, galaxy, nebula…';
     }
   }
 
@@ -390,21 +421,17 @@
   }
 
   function getDateFromUrl(){
-    const u = new URL(window.location.href);
-    return u.searchParams.get('date') || '';
+    return new URL(window.location.href).searchParams.get('date') || '';
   }
 
   async function translateEnToEs(text){
     const key = 'en->es|' + text;
     if (tCache.has(key)) return tCache.get(key);
-
     const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=es&dt=t&q='
       + encodeURIComponent(text);
-
     const r = await fetch(url);
     const data = await r.json();
     const out = (data?.[0] || []).map(x => x[0]).join('') || text;
-
     tCache.set(key, out);
     return out;
   }
@@ -425,7 +452,6 @@
     if (!apod) return '';
     const type = (apod.media_type || '').toLowerCase();
     if (type === 'image') return apod.hdurl || apod.url || '';
-    // video u other: abrir el url original (YouTube/Vimeo/etc.)
     return apod.url || '';
   }
 
@@ -434,16 +460,18 @@
     return type === 'video' || type === 'other';
   }
 
+  function pickThumb(item){
+    return item.thumbnail_url || item.hdurl || item.url || '';
+  }
+
+  // ── Render APOD principal ────────────────────────────────────
   function renderMedia(){
     if (!ORIGINAL) return;
-
     const mediaBox = document.getElementById('mediaBox');
     mediaBox.innerHTML = '';
-
     const type = (ORIGINAL.media_type || '').toLowerCase();
     const src = ORIGINAL.url;
 
-    // IMAGEN
     if (type === 'image') {
       const img = document.createElement('img');
       img.src = ORIGINAL.hdurl || ORIGINAL.url;
@@ -451,285 +479,220 @@
       mediaBox.appendChild(img);
       return;
     }
-
-    // VIDEO DIRECTO (mp4/webm/ogg)
     if (isDirectVideoUrl(src)) {
       const v = document.createElement('video');
-      v.src = src;
-      v.controls = true;
-      v.autoplay = true;
-      v.muted = true;
-      v.playsInline = true;
+      v.src = src; v.controls = true; v.autoplay = true; v.muted = true; v.playsInline = true;
       mediaBox.appendChild(v);
       return;
     }
-
-    // VIDEO/OTHER no directo: fallback + play abre afuera
     const wrapper = document.createElement('div');
     wrapper.className = 'videoFallback';
-
     if (ORIGINAL.thumbnail_url) {
       const img = document.createElement('img');
-      img.src = ORIGINAL.thumbnail_url;
-      img.alt = ORIGINAL.title || 'Recurso';
+      img.src = ORIGINAL.thumbnail_url; img.alt = ORIGINAL.title || 'Recurso';
       wrapper.appendChild(img);
     }
-
     const play = document.createElement('div');
     play.className = 'playBtn';
     play.innerHTML = '<span>▶️</span>';
     wrapper.appendChild(play);
-
-    play.addEventListener('click', () => {
-      openInNewTab(getBestAssetUrl(ORIGINAL));
-    });
-
+    play.addEventListener('click', () => openInNewTab(getBestAssetUrl(ORIGINAL)));
     mediaBox.appendChild(wrapper);
 
-    // Hint (ahora con emoji + texto amigable)
     const hint = document.createElement('div');
     hint.className = 'note';
-    hint.style.opacity = '0.95';
-    hint.style.margin = '10px 0 0';
-
-    if (isExternalMedia(ORIGINAL)) {
-      hint.innerHTML = (LANG === 'es')
-        ? `<span>🔒</span><span>Este video se abre en otra pestaña (el proveedor bloquea la reproducción aquí).</span>`
-        : `<span>🔒</span><span>This video opens in a new tab (provider blocks inline playback).</span>`;
-    } else {
-      // por si aparece algún tipo raro
-      hint.innerHTML = (LANG === 'es')
-        ? `<span>ℹ️</span><span>Este contenido se abrirá en una nueva pestaña.</span>`
-        : `<span>ℹ️</span><span>This content will open in a new tab.</span>`;
-    }
-
+    hint.innerHTML = isExternalMedia(ORIGINAL)
+      ? (LANG === 'es'
+          ? `<span>🔒</span><span>Este video se abre en otra pestaña (el proveedor bloquea la reproducción aquí).</span>`
+          : `<span>🔒</span><span>This video opens in a new tab (provider blocks inline playback).</span>`)
+      : `<span>ℹ️</span><span>${LANG==='es'?'Este contenido se abrirá en una nueva pestaña.':'This content will open in a new tab.'}</span>`;
     mediaBox.appendChild(hint);
   }
 
   async function renderText(){
     if (!ORIGINAL) return;
-
-    // Fecha en el badge (lo que antes te faltaba)
     document.getElementById('dateText').textContent = ORIGINAL.date || '—';
-
     const nasaPage = apodNasaPageFromDate(ORIGINAL.date);
     const asset = getBestAssetUrl(ORIGINAL);
+    const external = isExternalMedia(ORIGINAL);
 
     const nasaLinkEl = document.getElementById('nasaLink');
     const resourceBtnEl = document.getElementById('resourceBtn');
-    const footer = document.getElementById('footerHelp');
-
     nasaLinkEl.href = nasaPage || '#';
     resourceBtnEl.href = asset || '#';
-
-    // Textos del botón según tipo
-    const external = isExternalMedia(ORIGINAL);
-
     resourceBtnEl.textContent = external
       ? (LANG === 'es' ? 'Ver video externo ▶️' : 'Open external video ▶️')
       : (LANG === 'es' ? 'Ver recurso' : 'View resource');
 
-    // Apertura robusta (siempre new tab)
-    nasaLinkEl.onclick = (e) => {
-      e.preventDefault();
-      openInNewTab(nasaPage);
-    };
-    resourceBtnEl.onclick = (e) => {
-      e.preventDefault();
-      if (!asset) return;
-      openInNewTab(asset);
-    };
+    nasaLinkEl.onclick = (e) => { e.preventDefault(); openInNewTab(nasaPage); };
+    resourceBtnEl.onclick = (e) => { e.preventDefault(); if (asset) openInNewTab(asset); };
 
-    // Mensaje amigable debajo del botón (solo video/other)
-    footer.innerHTML = '';
-    if (external) {
-      footer.innerHTML = `
-        <div class="note">
-          <span>🎬</span>
-          <span>
-            ${LANG === 'es'
-              ? 'No podemos reproducir este video dentro de la página por restricciones del proveedor. Se abrirá en una nueva pestaña.'
-              : 'We can’t play this video inline due to provider restrictions. It will open in a new tab.'}
-          </span>
-        </div>
-      `;
-    }
+    document.getElementById('footerHelp').innerHTML = external ? `
+      <div class="note">
+        <span>🎬</span>
+        <span>${LANG==='es'
+          ? 'No podemos reproducir este video dentro de la página por restricciones del proveedor. Se abrirá en una nueva pestaña.'
+          : "We can't play this video inline due to provider restrictions. It will open in a new tab."}</span>
+      </div>` : '';
 
     let title = ORIGINAL.title || '—';
     let explanation = ORIGINAL.explanation || '';
-
     if (LANG === 'es') {
-      try {
-        title = await translateEnToEs(title);
-        explanation = await translateEnToEs(explanation);
-      } catch (_) {}
+      try { title = await translateEnToEs(title); explanation = await translateEnToEs(explanation); } catch (_) {}
     }
-
     document.getElementById('title').textContent = title;
     document.getElementById('explanation').textContent = explanation;
   }
 
+  // ── Carga inicial ────────────────────────────────────────────
   async function load(){
     syncLangUI();
-
     const date = getDateFromUrl();
     document.getElementById('d').value = date || '';
-
     const apiUrl = new URL('/api/apod', window.location.origin);
     if (date) apiUrl.searchParams.set('date', date);
-
     const errBox = document.getElementById('err');
     errBox.textContent = '';
-
     try {
       const r = await fetch(apiUrl.toString(), { cache: 'no-store' });
       const data = await r.json();
-
       if (!r.ok || data?.error) {
-        errBox.textContent = (LANG === 'es')
-          ? (data?.error || 'Error consultando la API')
-          : (data?.error || 'Error fetching the API');
+        errBox.textContent = data?.error || (LANG==='es' ? 'Error consultando la API' : 'Error fetching the API');
         document.getElementById('title').textContent = 'Error';
         return;
       }
-
       ORIGINAL = data;
-
       renderMedia();
       await renderText();
     } catch (e) {
-      errBox.textContent = (LANG === 'es')
-        ? 'No se pudo cargar APOD (error de red)'
-        : 'Could not load APOD (network error)';
+      errBox.textContent = LANG==='es' ? 'No se pudo cargar APOD (error de red)' : 'Could not load APOD (network error)';
       document.getElementById('title').textContent = 'Error';
     }
-    function normalize(s){
-  return (s || '')
-    .toString()
-    .trim()
-    .toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g,''); // saca acentos
-}
-
-function mapQueryToTag(q){
-  const x = normalize(q);
-
-  const dict = [
-    { tag: 'Moon', keys: ['luna','lunas','moon','lunar','selene','crater','crateres'] },
-    { tag: 'Mars', keys: ['marte','mars'] },
-    { tag: 'Jupiter', keys: ['jupiter','júpiter'] },
-    { tag: 'Saturn', keys: ['saturno','saturn','anillos','rings'] },
-    { tag: 'Eclipse', keys: ['eclipse','eclipses'] },
-    { tag: 'Galaxy', keys: ['galaxia','galaxias','galaxy','galaxies'] },
-    { tag: 'Nebula', keys: ['nebula','nebulosa','nebulosas'] },
-    { tag: 'Earth', keys: ['tierra','earth','iss','estacion espacial','space station'] },
-    { tag: 'Comet', keys: ['cometa','comet','asteroide','asteroid','meteor','meteoro'] },
-  ];
-
-  for (const d of dict){
-    if (d.keys.some(k => x.includes(normalize(k)))) return d.tag;
-  }
-  return ''; // sin match → podés caer a búsqueda por texto
-}
-
-function pickThumb(item){
-  // thumb preferido: thumbnail_url (videos) o url/hdurl (imágenes)
-  return item.thumbnail_url || item.hdurl || item.url || '';
-}
-
-function apodNasaPageFromDate(dateStr){
-  if (!dateStr) return 'https://apod.nasa.gov/apod/astropix.html';
-  const [yyyy, mm, dd] = String(dateStr).split('-');
-  const yy = yyyy?.slice(-2);
-  if (!yy || !mm || !dd) return 'https://apod.nasa.gov/apod/astropix.html';
-  return `https://apod.nasa.gov/apod/ap${yy}${mm}${dd}.html`;
-}
-
-function renderGallery(items, label){
-  const wrap = document.getElementById('galleryWrap');
-  const grid = document.getElementById('galleryGrid');
-  const title = document.getElementById('galleryTitle');
-  const hint = document.getElementById('galleryHint');
-
-  wrap.style.display = 'block';
-  grid.innerHTML = '';
-
-  title.textContent = (LANG === 'es')
-    ? `Resultados: ${label}`
-    : `Results: ${label}`;
-
-  hint.textContent = (LANG === 'es')
-    ? `${items.length} resultados`
-    : `${items.length} results`;
-
-  for (const it of items){
-    const thumb = pickThumb(it);
-    const nasaPage = apodNasaPageFromDate(it.date);
-    const asset = (it.media_type === 'image') ? (it.hdurl || it.url) : it.url;
-
-    const card = document.createElement('div');
-    card.style.border = '1px solid rgba(0,0,0,.12)';
-    card.style.borderRadius = '14px';
-    card.style.overflow = 'hidden';
-    card.style.background = 'rgba(255,255,255,.45)';
-
-    card.innerHTML = `
-      <div style="aspect-ratio: 4/3; background:rgba(0,0,0,.06); display:flex; align-items:center; justify-content:center;">
-        ${thumb ? `<img src="${thumb}" alt="" style="width:100%; height:100%; object-fit:cover; display:block;">`
-                : `<div style="padding:18px; color:var(--muted); font-size:13px;">Sin preview</div>`}
-      </div>
-      <div style="padding:10px 10px 12px;">
-        <div style="font-weight:700; font-size:13px; line-height:1.25; margin-bottom:6px;">
-          ${it.title || '—'}
-        </div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <a class="btn" href="#" style="padding:8px 10px;" data-asset>Ver recurso</a>
-          <a class="btn" href="#" style="padding:8px 10px;" data-nasa>Abrir NASA</a>
-        </div>
-      </div>
-    `;
-
-    card.querySelector('[data-asset]').onclick = (e) => {
-      e.preventDefault();
-      openInNewTab(asset);
-    };
-    card.querySelector('[data-nasa]').onclick = (e) => {
-      e.preventDefault();
-      openInNewTab(nasaPage);
-    };
-
-    grid.appendChild(card);
-  }
-}
-
-async function runSearch(){
-  const q = document.getElementById('q').value || '';
-  const tag = mapQueryToTag(q);
-
-  const url = new URL('/api/gallery', window.location.origin);
-  url.searchParams.set('limit', '12');
-  url.searchParams.set('days', '90'); // probá 60/90
-  if (tag) url.searchParams.set('tag', tag);
-  else url.searchParams.set('q', q);
-
-  const r = await fetch(url.toString(), { cache: 'no-store' });
-  const data = await r.json();
-
-  if (!r.ok || data?.error){
-    document.getElementById('err').textContent = data?.error || 'Error buscando';
-    return;
   }
 
-  renderGallery(data.items || [], tag ? q : q);
-}
-
-
-// Bonus: enter para buscar
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && document.activeElement?.id === 'q') runSearch();
-});
+  // ── Buscador ─────────────────────────────────────────────────
+  function normalize(s){
+    return (s||'').toString().trim().toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   }
-  
+
+  function mapQueryToEnglish(q){
+    const x = normalize(q);
+    const dict = [
+      { en: 'moon',    keys: ['luna','lunas','moon','lunar','selene','crater','crateres'] },
+      { en: 'mars',    keys: ['marte','mars'] },
+      { en: 'jupiter', keys: ['jupiter','júpiter'] },
+      { en: 'saturn',  keys: ['saturno','saturn','anillo','ring'] },
+      { en: 'eclipse', keys: ['eclipse'] },
+      { en: 'galaxy',  keys: ['galaxia','galaxy','galaxias','galaxies'] },
+      { en: 'nebula',  keys: ['nebula','nebulosa','nebulosas'] },
+      { en: 'earth',   keys: ['tierra','earth'] },
+      { en: 'comet',   keys: ['cometa','comet'] },
+      { en: 'asteroid',keys: ['asteroide','asteroid','meteor','meteoro'] },
+      { en: 'sun',     keys: ['sol','sun','solar'] },
+      { en: 'venus',   keys: ['venus'] },
+      { en: 'aurora',  keys: ['aurora','auroras'] },
+      { en: 'star',    keys: ['estrella','estrellas','star','stars'] },
+      { en: 'black hole', keys: ['agujero negro','black hole'] },
+      { en: 'supernova',  keys: ['supernova'] },
+      { en: 'cluster', keys: ['cumulo','cúmulo','cluster'] },
+    ];
+    for (const d of dict){
+      if (d.keys.some(k => x.includes(normalize(k)))) return d.en;
+    }
+    return x; // búsqueda libre en inglés si no matchea
+  }
+
+  async function runSearch(){
+    const raw = (document.getElementById('q').value || '').trim();
+    if (!raw) return;
+
+    const term = mapQueryToEnglish(raw);
+
+    // Mostrar galería y loading
+    const wrap    = document.getElementById('galleryWrap');
+    const grid    = document.getElementById('galleryGrid');
+    const loading = document.getElementById('galleryLoading');
+    const titleEl = document.getElementById('galleryTitle');
+    const hintEl  = document.getElementById('galleryHint');
+
+    wrap.style.display = 'block';
+    grid.innerHTML = '';
+    loading.style.display = 'block';
+    titleEl.textContent = LANG==='es' ? `Buscando "${raw}"…` : `Searching "${raw}"…`;
+    hintEl.textContent = '';
+
+    // Scroll suave a la galería
+    wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    try {
+      const url = new URL('/api/gallery', window.location.origin);
+      url.searchParams.set('q', term);
+      url.searchParams.set('limit', '20');
+
+      const r    = await fetch(url.toString(), { cache: 'no-store' });
+      const data = await r.json();
+
+      loading.style.display = 'none';
+
+      if (!r.ok || data?.error){
+        grid.innerHTML = `<div class="noResults">⚠️ ${data?.error || 'Error al buscar'}</div>`;
+        return;
+      }
+
+      const items = data.items || [];
+      titleEl.textContent = LANG==='es' ? `Resultados para "${raw}"` : `Results for "${raw}"`;
+      hintEl.textContent  = LANG==='es' ? `${items.length} encontrados` : `${items.length} found`;
+
+      if (items.length === 0){
+        grid.innerHTML = `<div class="noResults">${LANG==='es'
+          ? 'No se encontraron imágenes para esa búsqueda.'
+          : 'No images found for that search.'}</div>`;
+        return;
+      }
+
+      for (const it of items){
+        const thumb   = pickThumb(it);
+        const nasaPage = apodNasaPageFromDate(it.date);
+        const asset   = (it.media_type === 'image') ? (it.hdurl || it.url) : it.url;
+
+        const card = document.createElement('div');
+        card.className = 'galleryCard';
+
+        card.innerHTML = `
+          <div class="galleryThumb">
+            ${thumb
+              ? `<img src="${thumb}" alt="${it.title||''}" loading="lazy">`
+              : `<div style="padding:18px; color:var(--muted); font-size:12px; text-align:center;">🎬 Video</div>`}
+          </div>
+          <div class="galleryInfo">
+            <div class="galleryCardTitle">${it.title || '—'}</div>
+            <div class="galleryDate">📅 ${it.date || ''}</div>
+            <div class="galleryActions">
+              <button class="btn primary" data-asset="${asset}">
+                ${it.media_type === 'image' ? (LANG==='es'?'Ver imagen':'View image') : (LANG==='es'?'Ver video':'View video')}
+              </button>
+              <button class="btn" data-nasa="${nasaPage}">NASA</button>
+            </div>
+          </div>
+        `;
+
+        card.querySelector('[data-asset]').onclick = () => openInNewTab(asset);
+        card.querySelector('[data-nasa]').onclick  = () => openInNewTab(nasaPage);
+
+        grid.appendChild(card);
+      }
+
+    } catch(e){
+      loading.style.display = 'none';
+      grid.innerHTML = `<div class="noResults">⚠️ ${e.message}</div>`;
+    }
+  }
+
+  // Enter para buscar
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && document.activeElement?.id === 'q') runSearch();
+  });
 
   load();
 </script>
