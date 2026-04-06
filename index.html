@@ -549,13 +549,6 @@
     nasaLinkEl.onclick = (e) => { e.preventDefault(); openInNewTab(nasaPage); };
     resourceBtnEl.onclick = (e) => { e.preventDefault(); if (asset) openInNewTab(asset); };
 
-    document.getElementById('footerHelp').innerHTML = external ? `
-      <div class="note">
-        <span>🎬</span>
-        <span>${LANG==='es'
-          ? 'No podemos reproducir este video dentro de la página por restricciones del proveedor. Se abrirá en una nueva pestaña.'
-          : "We can't play this video inline due to provider restrictions. It will open in a new tab."}</span>
-      </div>` : '';
 
     let title = ORIGINAL.title || '—';
     let explanation = ORIGINAL.explanation || '';
