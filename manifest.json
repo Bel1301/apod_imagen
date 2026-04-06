@@ -1,0 +1,17 @@
+{
+  "name": "NASA Daily • APOD",
+  "short_name": "NASA Daily",
+  "description": "Astronomía diaria de la NASA con interfaz amigable por MBP",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6f1e7",
+  "theme_color": "#8b6b3d",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://apod.nasa.gov/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ]
+}
