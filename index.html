@@ -583,12 +583,23 @@
         return;
       }
       ORIGINAL = data;
+      // Aviso fallback
+const existing = document.getElementById('fallbackNote');
+if (existing) existing.remove();
+if (data.fallback) {
+  const note = document.createElement('div');
+  note.id = 'fallbackNote';
+  note.style = 'font-size:12px; color:var(--muted); margin-top:6px;';
+  note.textContent = '⚠️ La imagen de hoy aún no está disponible, mostrando la más reciente.';
+  document.getElementById('err').after(note);
+}
       renderMedia();
       await renderText();
     } catch (e) {
       errBox.textContent = LANG==='es' ? 'No se pudo cargar APOD (error de red)' : 'Could not load APOD (network error)';
       document.getElementById('title').textContent = 'Error';
     }
+  
   }
 
   // ── Buscador ─────────────────────────────────────────────────
