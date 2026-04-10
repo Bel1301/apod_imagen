@@ -545,8 +545,10 @@
     resourceBtnEl.textContent = external
       ? (LANG === 'es' ? 'Ver video externo ▶️' : 'Open external video ▶️')
       : (LANG === 'es' ? 'Ver recurso' : 'View resource');
-
-    nasaLinkEl.onclick = (e) => { e.preventDefault(); openInNewTab(nasaPage); };
+    
+nasaLinkEl.href = nasaPage;
+nasaLinkEl.target = '_blank';
+nasaLinkEl.onclick = null;
     resourceBtnEl.onclick = (e) => { e.preventDefault(); if (asset) openInNewTab(asset); };
   document.getElementById('footerHelp').innerHTML = external ? `
       <div class="note">
