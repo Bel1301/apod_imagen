@@ -2,34 +2,39 @@ const https = require('https');
 
 function httpsGet(url) {
   return new Promise((resolve, reject) => {
-    https.get(url, (res) => {
+    const req = https.get(url, (res) => {
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
         try { resolve({ status: res.statusCode, body: JSON.parse(data) }); }
-        catch(e) { reject(new Error('JSON parse error')); }
+        catch(e) { reject(new Error('JSON parse error: ' + data.slice(0, 100))); }
       });
-    }).on('error', reject);
+    });
+    // Timeout de 8 segundos para no pasarse del límite de Vercel
+    req.setTimeout(8000, () => {
+      req.destroy();
+      reject(new Error('Timeout consultando NASA'));
+    });
+    req.on('error', reject);
   });
 }
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  // Cache de 1 hora en CDN de Vercel — clave para no reventar el rate limit
   res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=600');
 
   const NASA_KEY = process.env.NASA_API_KEY;
   if (!NASA_KEY) {
-    return res.status(500).json({ error: 'Falta NASA_API_KEY en las variables de entorno de Vercel' });
+    return res.status(500).json({ error: 'Falta NASA_API_KEY en variables de entorno' });
   }
 
   const q     = (req.query.q || '').toLowerCase().trim();
-  const limit = Math.min(parseInt(req.query.limit) || 12, 40);
+  const limit = Math.min(parseInt(req.query.limit) || 12, 20);
 
-  // Buscar en los últimos 365 días para tener resultados reales
+  
   const end   = new Date();
   const start = new Date();
-  start.setFullYear(start.getFullYear() - 1);
+  start.setDate(start.getDate() - 30);
   const fmt = d => d.toISOString().split('T')[0];
 
   try {
@@ -37,29 +42,27 @@ module.exports = async function handler(req, res) {
 
     const { status, body } = await httpsGet(url);
 
-    // NASA devuelve error con status 429 (rate limit) o 400
     if (status === 429) {
-      return res.status(429).json({ error: 'Límite de la API de NASA alcanzado. Intentá en unos minutos.' });
+      return res.status(429).json({ error: 'Límite de NASA API alcanzado. Esperá unos minutos.' });
     }
-    if (!Array.isArray(body)) {
-      console.error('NASA error:', JSON.stringify(body));
-      return res.status(502).json({ error: 'Error de NASA API', detail: body?.msg || body?.error_message || 'Respuesta inesperada' });
+    if (status !== 200 || !Array.isArray(body)) {
+      return res.status(502).json({
+        error: 'Error de NASA: ' + (body?.msg || body?.error_message || `status ${status}`)
+      });
     }
 
-    // Filtrar por query si viene
     let items = q
       ? body.filter(item =>
           `${item.title} ${item.explanation}`.toLowerCase().includes(q)
         )
       : body;
 
-    // Más recientes primero, limitado
     items = items.reverse().slice(0, limit);
 
     return res.status(200).json({ items, total: items.length });
 
   } catch(e) {
-    console.error('Gallery handler error:', e.message);
-    return res.status(500).json({ error: 'Error interno: ' + e.message });
+    console.error('Gallery error:', e.message);
+    return res.status(500).json({ error: e.message });
   }
 };
