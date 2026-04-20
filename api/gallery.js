@@ -18,7 +18,7 @@ export default async function handler(req, res) {
   try {
     const url = `https://api.nasa.gov/planetary/apod?api_key=${NASA_KEY}&start_date=${fmt(start)}&end_date=${fmt(end)}&thumbs=true`;
 
-    const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
+    const r = await fetch(url, { signal: AbortSignal.timeout(30000) });
     const body = await r.json();
 
     if (r.status === 429) {
