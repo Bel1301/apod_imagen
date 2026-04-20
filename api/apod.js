@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-
+/
   try {
     const date = (req.query?.date || "").toString().trim();
     const apiKey = process.env.NASA_API_KEY;
