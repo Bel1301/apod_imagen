@@ -2,6 +2,8 @@ export default async function handler(req, res) {
   try {
     const date = (req.query?.date || req.body?.date || "").toString().trim();
     const apiKey = process.env.NASA_API_KEY;
+
+res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=300');
     if (!apiKey) {
       return res.status(500).json({ error: "Falta NASA_API_KEY" });
     }
