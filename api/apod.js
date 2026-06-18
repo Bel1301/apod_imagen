@@ -1,13 +1,8 @@
-// Sanitizar fecha
-const dateRaw = (req.query?.date || '').toString().trim();
-const date = /^\d{4}-\d{2}-\d{2}$/.test(dateRaw) ? dateRaw : '';
-
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const dateRaw = (req.query?.date || '').toString().slice(0, 10);
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(dateRaw) ? dateRaw : '';
 
-  const date = (req.query?.date || '').toString().trim();
   const apiKey = process.env.NASA_API_KEY;
-
   if (!apiKey) {
     return res.status(500).json({ error: 'Falta NASA_API_KEY' });
   }
@@ -25,8 +20,6 @@ export default async function handler(req, res) {
       });
 
       const text = await r.text();
-
-      // Si la respuesta no es JSON válido, reintentamos
       let data;
       try {
         data = JSON.parse(text);
@@ -80,7 +73,6 @@ export default async function handler(req, res) {
       return res.status(429).json({ error: 'Límite de NASA API alcanzado. Esperá unos minutos.' });
     }
 
-    // Fallback a ayer si no era fecha específica
     if (!date) {
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
@@ -98,6 +90,6 @@ export default async function handler(req, res) {
 
   } catch (e) {
     console.error('APOD error:', e.message);
-    return res.status(500).json({ error: 'Error interno: ' + e.message });
+    return res.status(500).json({ error: 'Error interno' });
   }
 }

@@ -4,6 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>NASA Daily • APOD</title>
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
+  <link rel="shortcut icon" href="/icon-192.png">
 
   <style>
   :root{
@@ -68,6 +71,7 @@
     border-radius:999px;
     background: rgba(255,255,255,.55);
     width: fit-content;
+    position:relative;
   }
   .badgeTop{ text-align:center; width:100%; }
 
@@ -283,10 +287,59 @@
     text-align:center; padding:32px; color:var(--muted); font-size:14px;
     grid-column: 1/-1;
   }
+
+  /* ── Splash screen ── */
+  #splash{
+    position:fixed; inset:0; z-index:9999;
+    background:radial-gradient(1200px 600px at 20% 0%, var(--bg2) 0%, var(--bg) 60%);
+    display:flex; align-items:center; justify-content:center;
+    animation: splashOut .6s ease forwards 2.2s;
+  }
+  .splashInner{
+    display:flex; flex-direction:column; align-items:center; gap:16px;
+    animation: splashIn .8s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  .splashBadge{
+    width:80px; height:80px; border-radius:50%;
+    border:1.5px solid rgba(139,107,61,.45);
+    background:rgba(139,107,61,.10);
+    display:flex; align-items:center; justify-content:center;
+    font-size:18px; font-weight:800; color:#8b6b3d; letter-spacing:.5px;
+    box-shadow: 0 8px 32px rgba(139,107,61,.18);
+  }
+  .splashTitle{
+    font-weight:800; font-size:28px; color:var(--accent);
+    letter-spacing:.5px; text-align:center; line-height:1;
+  }
+  .splashSub{
+    font-size:11px; color:var(--muted); letter-spacing:3.5px;
+    text-transform:uppercase;
+    animation: splashTagIn .6s ease both .5s;
+  }
+  @keyframes splashIn{
+    from{ opacity:0; transform:scale(.82) translateY(18px); }
+    to{   opacity:1; transform:scale(1)   translateY(0); }
+  }
+  @keyframes splashTagIn{
+    from{ opacity:0; transform:translateY(8px); }
+    to{   opacity:1; transform:translateY(0); }
+  }
+  @keyframes splashOut{
+    from{ opacity:1; }
+    to{   opacity:0; visibility:hidden; }
+  }
   </style>
 </head>
 
 <body>
+  <div id="splash" aria-hidden="true">
+    <div class="splashInner">
+      <div class="splashBadge">MBP</div>
+      <div class="splashTitle">NASA Daily</div>
+      <div class="splashSub">• APOD •</div>
+    </div>
+  </div>
+
   <div class="wrap">
     <div class="masthead">
       <div>
@@ -386,6 +439,18 @@
 
 
 <script>
+  // Remove splash from DOM once its fade-out animation ends
+  (function(){
+    const s = document.getElementById('splash');
+    if (!s) return;
+    s.addEventListener('animationend', function(e){
+      if (e.animationName === 'splashOut') s.remove();
+    });
+  })();
+
+  // HTML escape — prevents XSS when inserting NASA data into innerHTML
+  function esc(s){ return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
   let LANG = localStorage.getItem('lang') || 'en';
   const tCache = new Map();
   let ORIGINAL = null;
@@ -699,17 +764,17 @@ if (data.fallback) {
         card.innerHTML = `
           <div class="galleryThumb">
             ${thumb
-              ? `<img src="${thumb}" alt="${it.title||''}" loading="lazy">`
+              ? `<img src="${esc(thumb)}" alt="${esc(it.title)}" loading="lazy">`
               : `<div style="padding:18px; color:var(--muted); font-size:12px; text-align:center;">🎬 Video</div>`}
           </div>
           <div class="galleryInfo">
-            <div class="galleryCardTitle">${it.title || '—'}</div>
-            <div class="galleryDate">📅 ${it.date || ''}</div>
+            <div class="galleryCardTitle">${esc(it.title) || '—'}</div>
+            <div class="galleryDate">📅 ${esc(it.date)}</div>
             <div class="galleryActions">
-              <button class="btn primary" data-asset="${asset}">
+              <button class="btn primary" data-asset="${esc(asset)}">
                 ${it.media_type === 'image' ? (LANG==='es'?'Ver imagen':'View image') : (LANG==='es'?'Ver video':'View video')}
               </button>
-              <button class="btn" data-nasa="${nasaPage}">NASA</button>
+              <button class="btn" data-nasa="${esc(nasaPage)}">NASA</button>
             </div>
           </div>
         `;

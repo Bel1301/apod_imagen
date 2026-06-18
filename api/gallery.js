@@ -1,9 +1,4 @@
-// Sanitizar fecha
-const dateRaw = (req.query?.date || '').toString().trim();
-const date = /^\d{4}-\d{2}-\d{2}$/.test(dateRaw) ? dateRaw : '';
-
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=600');
 
   const NASA_KEY = process.env.NASA_API_KEY;
@@ -11,7 +6,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Falta NASA_API_KEY en variables de entorno' });
   }
 
-  const q     = (req.query.q || '').toLowerCase().trim();
+  const q = (req.query.q || '').toString().slice(0, 100).toLowerCase().trim();
   const limit = Math.min(parseInt(req.query.limit) || 12, 20);
 
   const end   = new Date();
@@ -46,6 +41,6 @@ export default async function handler(req, res) {
 
   } catch(e) {
     console.error('Gallery error:', e.message);
-    return res.status(500).json({ error: e.message });
+    return res.status(500).json({ error: 'Error interno' });
   }
 }
