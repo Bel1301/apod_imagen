@@ -467,7 +467,8 @@
   function resolveExternalUrl(u){
     if (!u) return '';
     const s = String(u).trim();
-    if (s.startsWith('http://') || s.startsWith('https://')) return s;
+    if (s.startsWith('https://')) return s;
+    if (s.startsWith('http://')) return 'https://' + s.slice(7);
     if (s.startsWith('//')) return 'https:' + s;
     if (s.startsWith('/')) return 'https://apod.nasa.gov' + s;
     return 'https://' + s;
@@ -608,15 +609,11 @@
 
     const nasaLinkEl = document.getElementById('nasaLink');
     const resourceBtnEl = document.getElementById('resourceBtn');
-    nasaLinkEl.href = nasaPage || '#';
-    resourceBtnEl.href = asset || '#';
+    nasaLinkEl.href = nasaPage;
+    resourceBtnEl.href = resolveExternalUrl(asset) || '#';
     resourceBtnEl.textContent = external
       ? (LANG === 'es' ? 'Ver video externo ▶️' : 'Open external video ▶️')
       : (LANG === 'es' ? 'Ver recurso' : 'View resource');
-    
-nasaLinkEl.href = nasaPage;
-nasaLinkEl.target = '_blank';
-nasaLinkEl.onclick = null;
     resourceBtnEl.onclick = (e) => { e.preventDefault(); if (asset) openInNewTab(asset); };
   document.getElementById('footerHelp').innerHTML = external ? `
       <div class="note">

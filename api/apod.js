@@ -1,4 +1,9 @@
 export default async function handler(req, res) {
+  if (req.method !== 'GET') {
+    res.setHeader('Allow', 'GET');
+    return res.status(405).json({ error: 'Método no permitido' });
+  }
+
   const dateRaw = (req.query?.date || '').toString().slice(0, 10);
   const date = /^\d{4}-\d{2}-\d{2}$/.test(dateRaw) ? dateRaw : '';
 
@@ -84,9 +89,7 @@ export default async function handler(req, res) {
       }
     }
 
-    return res.status(first.status).json({
-      error: first.data?.msg || first.data?.error_message || 'Error de NASA'
-    });
+    return res.status(502).json({ error: 'Error de NASA' });
 
   } catch (e) {
     console.error('APOD error:', e.message);
