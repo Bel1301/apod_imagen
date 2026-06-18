@@ -308,7 +308,10 @@
             <span id="labelDate">Fecha</span>: <b id="dateText">—</b>
           </div>
           <div class="badgeRow">
-            <input id="d" class="dateInput" type="date">
+            <label for="d" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);">
+  Seleccionar fecha
+</label>
+<input id="d" class="dateInput" type="date" aria-label="Seleccionar fecha">
             <button class="dateBtn" onclick="go()" id="btnView">Ver</button>
           </div>
           <div id="err" class="error"></div>
