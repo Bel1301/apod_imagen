@@ -39,24 +39,33 @@
   /* Tierra asomándose desde abajo */
   #earthWrap{
     position:fixed;
-    bottom:-520px;
-    left:50%;
-    transform:translateX(-50%);
+    bottom:0;
+    left:0;
+    right:0;
+    height:280px;
+    overflow:hidden;
     z-index:0;
     pointer-events:none;
-    width:800px;
-    max-width:130vw;
   }
-  #earthWrap svg{
+  #earthWrap::after{
+    content:'';
+    position:absolute;
+    top:0; left:0; right:0;
+    height:140px;
+    background:linear-gradient(to bottom, #07091a 0%, transparent 100%);
+    z-index:1;
+  }
+  #earthWrap img{
     width:100%;
     height:auto;
-    filter: drop-shadow(0 -30px 80px rgba(50,130,255,0.22));
+    display:block;
   }
   @media (max-width:600px){
-    #earthWrap{ width:520px; bottom:-340px; }
+    #earthWrap{ height:175px; }
+    #earthWrap::after{ height:80px; }
   }
 
-  .wrap{ max-width:980px; margin:0 auto; padding:28px 18px 140px; position:relative; z-index:1; }
+  .wrap{ max-width:980px; margin:0 auto; padding:28px 18px 310px; position:relative; z-index:1; }
 
   .masthead{
     display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:18px;
@@ -373,56 +382,7 @@
 
   <!-- Planeta Tierra asomándose desde abajo -->
   <div id="earthWrap" aria-hidden="true">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 700">
-      <defs>
-        <radialGradient id="ocean" cx="38%" cy="32%" r="62%">
-          <stop offset="0%"   stop-color="#5aaee8"/>
-          <stop offset="40%"  stop-color="#2175b8"/>
-          <stop offset="75%"  stop-color="#0e4a80"/>
-          <stop offset="100%" stop-color="#07233d"/>
-        </radialGradient>
-        <radialGradient id="atmo" cx="50%" cy="50%" r="50%">
-          <stop offset="82%"  stop-color="transparent"/>
-          <stop offset="93%"  stop-color="rgba(80,160,255,0.10)"/>
-          <stop offset="100%" stop-color="rgba(80,160,255,0.30)"/>
-        </radialGradient>
-        <radialGradient id="shine" cx="32%" cy="28%" r="48%">
-          <stop offset="0%"   stop-color="rgba(255,255,255,0.13)"/>
-          <stop offset="100%" stop-color="transparent"/>
-        </radialGradient>
-      </defs>
-
-      <!-- Halo atmosférico exterior -->
-      <circle cx="350" cy="350" r="330" fill="none" stroke="rgba(80,160,255,0.07)" stroke-width="28"/>
-
-      <!-- Superficie terrestre (océano) -->
-      <circle cx="350" cy="350" r="300" fill="url(#ocean)"/>
-
-      <!-- Continentes simplificados -->
-      <ellipse cx="190" cy="235" rx="62" ry="88" fill="#4a7a45" opacity="0.82" transform="rotate(-20 190 235)"/>
-      <ellipse cx="235" cy="388" rx="44" ry="72" fill="#3d7040" opacity="0.78" transform="rotate(15 235 388)"/>
-      <ellipse cx="358" cy="218" rx="38" ry="52" fill="#5a8a55" opacity="0.78" transform="rotate(-5 358 218)"/>
-      <ellipse cx="372" cy="335" rx="48" ry="78" fill="#6a7a40" opacity="0.72" transform="rotate(10 372 335)"/>
-      <ellipse cx="502" cy="210" rx="78" ry="62" fill="#5a8055" opacity="0.78" transform="rotate(5 502 210)"/>
-      <ellipse cx="542" cy="308" rx="52" ry="48" fill="#4a7045" opacity="0.68" transform="rotate(-10 542 308)"/>
-      <ellipse cx="155" cy="168" rx="28" ry="38" fill="#3d7a3a" opacity="0.65"/>
-
-      <!-- Casquete polar ártico -->
-      <ellipse cx="350" cy="52" rx="118" ry="44" fill="rgba(230,245,255,0.72)"/>
-
-      <!-- Nubes -->
-      <ellipse cx="278" cy="165" rx="88" ry="22" fill="rgba(255,255,255,0.22)" transform="rotate(-25 278 165)"/>
-      <ellipse cx="468" cy="258" rx="68" ry="17" fill="rgba(255,255,255,0.18)" transform="rotate(15 468 258)"/>
-      <ellipse cx="178" cy="318" rx="78" ry="19" fill="rgba(255,255,255,0.17)" transform="rotate(-10 178 318)"/>
-      <ellipse cx="398" cy="448" rx="62" ry="16" fill="rgba(255,255,255,0.14)" transform="rotate(20 398 448)"/>
-      <ellipse cx="298" cy="118" rx="72" ry="17" fill="rgba(255,255,255,0.19)" transform="rotate(5 298 118)"/>
-      <ellipse cx="520" cy="380" rx="58" ry="15" fill="rgba(255,255,255,0.13)" transform="rotate(-15 520 380)"/>
-
-      <!-- Brillo especular -->
-      <circle cx="350" cy="350" r="300" fill="url(#shine)"/>
-      <!-- Overlay atmósfera -->
-      <circle cx="350" cy="350" r="300" fill="url(#atmo)"/>
-    </svg>
+    <img src="/tierra.webp" alt="">
   </div>
 
   <!-- Splash screen -->
