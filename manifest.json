@@ -1,11 +1,11 @@
 {
-  "name": "NASA Daily • APOD",
-  "short_name": "NASA Daily",
-  "description": "Astronomía diaria de la NASA con interfaz amigable — by MBP",
+  "name": "Horizon",
+  "short_name": "Horizon",
+  "description": "Astronomía diaria de la NASA — Horizon by MBP",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f6f1e7",
-  "theme_color": "#8b6b3d",
+  "background_color": "#07091a",
+  "theme_color": "#07091a",
   "orientation": "portrait-primary",
   "icons": [
     {

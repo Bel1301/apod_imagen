@@ -3,38 +3,70 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>NASA Daily • APOD</title>
+  <title>Horizon</title>
   <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
   <link rel="shortcut icon" href="/icon-192.png">
 
   <style>
   :root{
-    --bg:#f6f1e7;
-    --bg2:#efe7d8;
-    --text:#2b2b2b;
-    --muted:#6b6b6b;
-    --accent:#8b6b3d;
-    --border:rgba(0,0,0,.12);
-    --card:rgba(255,255,255,.55);
-    --card2:rgba(255,255,255,.35);
+    --bg:#07091a;
+    --bg2:#0d1228;
+    --text:#dce4f5;
+    --muted:#7a88a8;
+    --accent:#c8956a;
+    --border:rgba(255,255,255,.1);
+    --card:rgba(255,255,255,.07);
+    --card2:rgba(255,255,255,.03);
   }
 
   body{
     margin:0;
-    background:radial-gradient(1200px 600px at 20% 0%, var(--bg2) 0%, var(--bg) 60%);
+    background: radial-gradient(ellipse 130% 55% at 50% -5%, #162040 0%, #07091a 65%);
     color:var(--text);
     font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    min-height:100vh;
   }
 
-  .wrap{ max-width: 980px; margin: 0 auto; padding: 28px 18px 60px; }
+  /* Canvas de estrellas */
+  #stars{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    pointer-events:none;
+  }
+
+  /* Tierra asomándose desde abajo */
+  #earthWrap{
+    position:fixed;
+    bottom:-520px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:0;
+    pointer-events:none;
+    width:800px;
+    max-width:130vw;
+  }
+  #earthWrap svg{
+    width:100%;
+    height:auto;
+    filter: drop-shadow(0 -30px 80px rgba(50,130,255,0.22));
+  }
+  @media (max-width:600px){
+    #earthWrap{ width:520px; bottom:-340px; }
+  }
+
+  .wrap{ max-width:980px; margin:0 auto; padding:28px 18px 140px; position:relative; z-index:1; }
 
   .masthead{
     display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:18px;
   }
 
   .brand{
-    font-weight:800; letter-spacing:.6px; font-size:14px; color:var(--muted); text-transform:uppercase;
+    font-weight:800; letter-spacing:3px; font-size:16px; color:var(--text); text-transform:uppercase;
+  }
+  .brandSub{
+    font-size:11px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; margin-top:2px;
   }
 
   .rightTop{
@@ -50,7 +82,7 @@
     width:38px; height:38px;
     border-radius:999px;
     border:1px solid var(--border);
-    background: rgba(255,255,255,.55);
+    background:rgba(255,255,255,.08);
     cursor:pointer;
     display:flex;
     align-items:center;
@@ -61,17 +93,18 @@
     width:20px; height:14px; border-radius:3px; display:block;
   }
   .flagBtn.active{
-    outline:2px solid rgba(139,107,61,.35);
-    border-color: rgba(139,107,61,.55);
+    outline:2px solid rgba(200,149,106,.38);
+    border-color:rgba(200,149,106,.55);
   }
 
   .badge{
     border:1px solid var(--border);
     padding:10px 12px;
     border-radius:999px;
-    background: rgba(255,255,255,.55);
-    width: fit-content;
+    background:rgba(255,255,255,.07);
+    width:fit-content;
     position:relative;
+    backdrop-filter:blur(10px);
   }
   .badgeTop{ text-align:center; width:100%; }
 
@@ -82,22 +115,23 @@
   .dateInput{
     padding:6px 10px;
     border-radius:999px;
-    border:1px solid rgba(0,0,0,.18);
-    background:rgba(255,255,255,.75);
+    border:1px solid rgba(255,255,255,.15);
+    background:rgba(255,255,255,.08);
     color:var(--text);
     outline:none;
+    color-scheme:dark;
   }
 
   .dateBtn{
     padding:6px 12px;
     border-radius:999px;
-    border:1px solid rgba(139,107,61,.55);
-    background:rgba(139,107,61,.12);
+    border:1px solid rgba(200,149,106,.55);
+    background:rgba(200,149,106,.12);
     color:var(--text);
     cursor:pointer;
     font-size:14px;
   }
-  .dateBtn:hover{ background:rgba(139,107,61,.22); }
+  .dateBtn:hover{ background:rgba(200,149,106,.22); }
 
   /* Buscador */
   .searchRow{
@@ -112,47 +146,48 @@
   .searchInput{
     width:100%; padding:10px 12px 10px 38px;
     border-radius:999px;
-    border:1px solid rgba(0,0,0,.18);
-    background:rgba(255,255,255,.75);
+    border:1px solid rgba(255,255,255,.15);
+    background:rgba(255,255,255,.08);
     outline:none; color:var(--text);
     font-size:14px;
     box-sizing:border-box;
   }
+  .searchInput::placeholder{ color:var(--muted); }
   .searchInput:focus{
-    border-color: rgba(139,107,61,.55);
-    background:rgba(255,255,255,.95);
+    border-color:rgba(200,149,106,.55);
+    background:rgba(255,255,255,.12);
   }
 
   .card{
-    background: linear-gradient(180deg, var(--card), var(--card2));
+    background:linear-gradient(180deg, var(--card), var(--card2));
     border:1px solid var(--border);
-    border-radius: 18px;
+    border-radius:18px;
     overflow:hidden;
-    box-shadow: 0 20px 50px rgba(0,0,0,.18);
-    backdrop-filter: blur(6px);
+    box-shadow:0 20px 60px rgba(0,0,0,.5);
+    backdrop-filter:blur(14px);
   }
 
-  .hero{ padding: 22px 22px 0; }
-  h1{ margin: 10px 0 8px; font-size: clamp(26px, 4vw, 42px); line-height:1.05; }
+  .hero{ padding:22px 22px 0; }
+  h1{ margin:10px 0 8px; font-size:clamp(26px,4vw,42px); line-height:1.05; }
 
   .meta{
     display:flex; flex-wrap:wrap; gap:10px; align-items:center;
-    color:var(--muted); font-size:13px; margin-bottom: 8px;
+    color:var(--muted); font-size:13px; margin-bottom:8px;
   }
   .meta a{ color:var(--accent); text-decoration:none; }
 
   .content{
-    display:grid; grid-template-columns: 1.4fr .9fr; gap: 18px;
-    padding: 18px 22px 22px;
+    display:grid; grid-template-columns:1.4fr .9fr; gap:18px;
+    padding:18px 22px 22px;
   }
-  @media (max-width: 900px){ .content{ grid-template-columns: 1fr; } }
+  @media (max-width:900px){ .content{ grid-template-columns:1fr; } }
 
   .figure{
     border:1px solid var(--border);
-    border-radius: 14px;
+    border-radius:14px;
     overflow:hidden;
-    background: rgba(255,255,255,.40);
-    min-height: 320px;
+    background:rgba(0,0,0,.35);
+    min-height:320px;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -162,7 +197,7 @@
   .figure iframe, .figure video{
     width:100%; height:520px; border:0; display:block;
   }
-  @media (max-width: 900px){
+  @media (max-width:900px){
     .figure iframe, .figure video{ height:260px; }
   }
 
@@ -170,10 +205,10 @@
     border:1px solid var(--border);
     border-radius:14px;
     padding:16px;
-    background: rgba(255,255,255,.45);
+    background:rgba(255,255,255,.04);
   }
   .copy p{
-    margin:0; color:var(--text); line-height:1.55; font-size:15px; white-space: pre-wrap;
+    margin:0; color:var(--text); line-height:1.55; font-size:15px; white-space:pre-wrap;
   }
 
   .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
@@ -182,38 +217,38 @@
     display:inline-block; padding:10px 12px; border-radius:12px;
     border:1px solid var(--border); color:var(--text);
     text-decoration:none; font-size:13px;
-    background: rgba(255,255,255,.55);
+    background:rgba(255,255,255,.08);
     cursor:pointer;
   }
   .btn.primary{
-    border-color: rgba(139,107,61,.55);
-    background: rgba(139,107,61,.12);
+    border-color:rgba(200,149,106,.55);
+    background:rgba(200,149,106,.12);
   }
-  .btn:hover{ background: rgba(255,255,255,.85); }
+  .btn:hover{ background:rgba(255,255,255,.14); }
 
   .error{
-    margin-top:10px; color:#9b2c2c; font-size:12px;
+    margin-top:10px; color:#fc8181; font-size:12px;
   }
 
   .videoFallback{
-    position:relative; width:100%; min-height: 320px;
-    border-radius: 12px; overflow: hidden;
-    border:1px solid rgba(0,0,0,.12);
-    background: rgba(0,0,0,.08);
+    position:relative; width:100%; min-height:320px;
+    border-radius:12px; overflow:hidden;
+    border:1px solid rgba(255,255,255,.1);
+    background:rgba(0,0,0,.35);
     display:flex; align-items:center; justify-content:center;
   }
-  .videoFallback img{ width:100%; height:100%; object-fit: cover; display:block; }
+  .videoFallback img{ width:100%; height:100%; object-fit:cover; display:block; }
   .playBtn{
     position:absolute; inset:0; display:flex;
     align-items:center; justify-content:center;
-    cursor:pointer; background: rgba(0,0,0,.15);
+    cursor:pointer; background:rgba(0,0,0,.2);
   }
   .playBtn span{
     width:64px; height:64px; border-radius:999px;
-    background: rgba(255,255,255,.92);
+    background:rgba(255,255,255,.16);
     display:flex; align-items:center; justify-content:center;
-    font-size:22px; border:1px solid rgba(0,0,0,.18);
-    box-shadow: 0 10px 30px rgba(0,0,0,.20);
+    font-size:22px; border:1px solid rgba(255,255,255,.2);
+    box-shadow:0 10px 30px rgba(0,0,0,.5);
   }
 
   .note{
@@ -223,7 +258,7 @@
 
   /* ── Galería de resultados ── */
   #galleryWrap{
-    max-width:980px; margin: 24px auto 0;
+    max-width:980px; margin:24px auto 0;
   }
   .galleryHeader{
     display:flex; justify-content:space-between; align-items:center;
@@ -234,27 +269,28 @@
 
   #galleryGrid{
     display:grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns:repeat(4,1fr);
     gap:12px;
   }
   @media (max-width:900px){
-    #galleryGrid{ grid-template-columns: repeat(2, 1fr); }
+    #galleryGrid{ grid-template-columns:repeat(2,1fr); }
   }
 
   .galleryCard{
     border:1px solid var(--border);
     border-radius:14px;
     overflow:hidden;
-    background: rgba(255,255,255,.45);
-    transition: box-shadow .2s, transform .2s;
+    background:rgba(255,255,255,.05);
+    backdrop-filter:blur(8px);
+    transition:box-shadow .2s, transform .2s;
   }
   .galleryCard:hover{
-    box-shadow: 0 8px 24px rgba(0,0,0,.14);
-    transform: translateY(-2px);
+    box-shadow:0 8px 28px rgba(0,0,0,.45);
+    transform:translateY(-2px);
   }
   .galleryThumb{
-    aspect-ratio: 4/3;
-    background:rgba(0,0,0,.06);
+    aspect-ratio:4/3;
+    background:rgba(0,0,0,.3);
     display:flex; align-items:center; justify-content:center;
     overflow:hidden;
   }
@@ -278,43 +314,43 @@
     padding:6px 10px; font-size:12px;
   }
 
-  /* Loading spinner en galería */
   #galleryLoading{
     text-align:center; padding:32px; color:var(--muted); font-size:14px;
   }
 
   .noResults{
     text-align:center; padding:32px; color:var(--muted); font-size:14px;
-    grid-column: 1/-1;
+    grid-column:1/-1;
   }
 
   /* ── Splash screen ── */
   #splash{
     position:fixed; inset:0; z-index:9999;
-    background:radial-gradient(1200px 600px at 20% 0%, var(--bg2) 0%, var(--bg) 60%);
+    background:radial-gradient(ellipse 130% 55% at 50% -5%, #162040 0%, #07091a 65%);
     display:flex; align-items:center; justify-content:center;
-    animation: splashOut .6s ease forwards 2.2s;
+    animation:splashOut .6s ease forwards 2.2s;
   }
   .splashInner{
     display:flex; flex-direction:column; align-items:center; gap:16px;
-    animation: splashIn .8s cubic-bezier(.34,1.56,.64,1) both;
+    animation:splashIn .8s cubic-bezier(.34,1.56,.64,1) both;
   }
   .splashBadge{
     width:80px; height:80px; border-radius:50%;
-    border:1.5px solid rgba(139,107,61,.45);
-    background:rgba(139,107,61,.10);
+    border:1.5px solid rgba(200,149,106,.45);
+    background:rgba(200,149,106,.10);
     display:flex; align-items:center; justify-content:center;
-    font-size:18px; font-weight:800; color:#8b6b3d; letter-spacing:.5px;
-    box-shadow: 0 8px 32px rgba(139,107,61,.18);
+    font-size:18px; font-weight:800; color:#c8956a; letter-spacing:.5px;
+    box-shadow:0 8px 32px rgba(200,149,106,.18);
   }
   .splashTitle{
-    font-weight:800; font-size:28px; color:var(--accent);
-    letter-spacing:.5px; text-align:center; line-height:1;
+    font-weight:800; font-size:40px; color:var(--text);
+    letter-spacing:5px; text-align:center; line-height:1;
+    text-transform:uppercase;
   }
   .splashSub{
     font-size:11px; color:var(--muted); letter-spacing:3.5px;
     text-transform:uppercase;
-    animation: splashTagIn .6s ease both .5s;
+    animation:splashTagIn .6s ease both .5s;
   }
   @keyframes splashIn{
     from{ opacity:0; transform:scale(.82) translateY(18px); }
@@ -332,18 +368,77 @@
 </head>
 
 <body>
+  <!-- Fondo de estrellas -->
+  <canvas id="stars" aria-hidden="true"></canvas>
+
+  <!-- Planeta Tierra asomándose desde abajo -->
+  <div id="earthWrap" aria-hidden="true">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 700">
+      <defs>
+        <radialGradient id="ocean" cx="38%" cy="32%" r="62%">
+          <stop offset="0%"   stop-color="#5aaee8"/>
+          <stop offset="40%"  stop-color="#2175b8"/>
+          <stop offset="75%"  stop-color="#0e4a80"/>
+          <stop offset="100%" stop-color="#07233d"/>
+        </radialGradient>
+        <radialGradient id="atmo" cx="50%" cy="50%" r="50%">
+          <stop offset="82%"  stop-color="transparent"/>
+          <stop offset="93%"  stop-color="rgba(80,160,255,0.10)"/>
+          <stop offset="100%" stop-color="rgba(80,160,255,0.30)"/>
+        </radialGradient>
+        <radialGradient id="shine" cx="32%" cy="28%" r="48%">
+          <stop offset="0%"   stop-color="rgba(255,255,255,0.13)"/>
+          <stop offset="100%" stop-color="transparent"/>
+        </radialGradient>
+      </defs>
+
+      <!-- Halo atmosférico exterior -->
+      <circle cx="350" cy="350" r="330" fill="none" stroke="rgba(80,160,255,0.07)" stroke-width="28"/>
+
+      <!-- Superficie terrestre (océano) -->
+      <circle cx="350" cy="350" r="300" fill="url(#ocean)"/>
+
+      <!-- Continentes simplificados -->
+      <ellipse cx="190" cy="235" rx="62" ry="88" fill="#4a7a45" opacity="0.82" transform="rotate(-20 190 235)"/>
+      <ellipse cx="235" cy="388" rx="44" ry="72" fill="#3d7040" opacity="0.78" transform="rotate(15 235 388)"/>
+      <ellipse cx="358" cy="218" rx="38" ry="52" fill="#5a8a55" opacity="0.78" transform="rotate(-5 358 218)"/>
+      <ellipse cx="372" cy="335" rx="48" ry="78" fill="#6a7a40" opacity="0.72" transform="rotate(10 372 335)"/>
+      <ellipse cx="502" cy="210" rx="78" ry="62" fill="#5a8055" opacity="0.78" transform="rotate(5 502 210)"/>
+      <ellipse cx="542" cy="308" rx="52" ry="48" fill="#4a7045" opacity="0.68" transform="rotate(-10 542 308)"/>
+      <ellipse cx="155" cy="168" rx="28" ry="38" fill="#3d7a3a" opacity="0.65"/>
+
+      <!-- Casquete polar ártico -->
+      <ellipse cx="350" cy="52" rx="118" ry="44" fill="rgba(230,245,255,0.72)"/>
+
+      <!-- Nubes -->
+      <ellipse cx="278" cy="165" rx="88" ry="22" fill="rgba(255,255,255,0.22)" transform="rotate(-25 278 165)"/>
+      <ellipse cx="468" cy="258" rx="68" ry="17" fill="rgba(255,255,255,0.18)" transform="rotate(15 468 258)"/>
+      <ellipse cx="178" cy="318" rx="78" ry="19" fill="rgba(255,255,255,0.17)" transform="rotate(-10 178 318)"/>
+      <ellipse cx="398" cy="448" rx="62" ry="16" fill="rgba(255,255,255,0.14)" transform="rotate(20 398 448)"/>
+      <ellipse cx="298" cy="118" rx="72" ry="17" fill="rgba(255,255,255,0.19)" transform="rotate(5 298 118)"/>
+      <ellipse cx="520" cy="380" rx="58" ry="15" fill="rgba(255,255,255,0.13)" transform="rotate(-15 520 380)"/>
+
+      <!-- Brillo especular -->
+      <circle cx="350" cy="350" r="300" fill="url(#shine)"/>
+      <!-- Overlay atmósfera -->
+      <circle cx="350" cy="350" r="300" fill="url(#atmo)"/>
+    </svg>
+  </div>
+
+  <!-- Splash screen -->
   <div id="splash" aria-hidden="true">
     <div class="splashInner">
       <div class="splashBadge">MBP</div>
-      <div class="splashTitle">NASA Daily</div>
-      <div class="splashSub">• APOD •</div>
+      <div class="splashTitle">Horizon</div>
+      <div class="splashSub">• powered by NASA •</div>
     </div>
   </div>
 
   <div class="wrap">
     <div class="masthead">
       <div>
-        <div class="brand">NASA Daily • APOD</div>
+        <div class="brand">Horizon</div>
+        <div class="brandSub">Powered by NASA APOD</div>
       </div>
 
       <div class="rightTop">
@@ -412,33 +507,58 @@
       <div id="galleryLoading" style="display:none;">Buscando…</div>
       <div id="galleryGrid"></div>
     </div>
-<footer style="border-top: 0.5px solid rgba(139,107,61,0.2); margin-top: 48px; padding: 32px 0 28px; text-align: center; font-family: inherit;">
-  <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
 
-    <div style="display:flex; align-items:center; gap:10px;">
-      <div style="width:32px; height:32px; border-radius:50%; border:1px solid rgba(139,107,61,.45); background:rgba(139,107,61,.10); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#8b6b3d; letter-spacing:.5px;">MBP</div>
-      <span style="font-size:13px; font-weight:600; color:var(--accent); letter-spacing:.4px;">NASA Daily • APOD</span>
-    </div>
+    <footer style="border-top:0.5px solid rgba(200,149,106,0.2); margin-top:48px; padding:32px 0 28px; text-align:center; font-family:inherit;">
+      <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
 
-    <div style="width:40px; height:0.5px; background:rgba(139,107,61,.35);"></div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:32px; height:32px; border-radius:50%; border:1px solid rgba(200,149,106,.45); background:rgba(200,149,106,.10); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#c8956a; letter-spacing:.5px;">MBP</div>
+          <span style="font-size:14px; font-weight:800; color:var(--text); letter-spacing:3px; text-transform:uppercase;">Horizon</span>
+        </div>
 
-    <p style="margin:0; font-size:12px; color:var(--muted); line-height:1.6; max-width:420px;">
-      Interfaz desarrollada<strong style="color:var(--accent);"></strong> sobre la API de la NASA.<br>
-      Las imágenes y contenidos astronómicos pertenecen a sus respectivos autores.
-    </p>
+        <div style="width:40px; height:0.5px; background:rgba(200,149,106,.35);"></div>
 
-    <div style="display:flex; align-items:center; gap:16px; margin-top:4px;">
-      <span style="font-size:11px; color:var(--muted);">© 2026 MBP • Todos los derechos reservados</span>
-      <span style="color:rgba(139,107,61,.3);">·</span>
-      <a href="https://apod.nasa.gov" target="_blank" rel="noopener noreferrer" style="font-size:11px; color:var(--accent); text-decoration:none; opacity:.85;">NASA APOD oficial</a>
-    </div>
+        <p style="margin:0; font-size:12px; color:var(--muted); line-height:1.6; max-width:420px;">
+          Interfaz desarrollada sobre la API de la NASA.<br>
+          Las imágenes y contenidos astronómicos pertenecen a sus respectivos autores.
+        </p>
 
-  </div>
-</footer>
+        <div style="display:flex; align-items:center; gap:16px; margin-top:4px;">
+          <span style="font-size:11px; color:var(--muted);">© 2026 MBP • Todos los derechos reservados</span>
+          <span style="color:rgba(200,149,106,.3);">·</span>
+          <a href="https://apod.nasa.gov" target="_blank" rel="noopener noreferrer" style="font-size:11px; color:var(--accent); text-decoration:none; opacity:.85;">NASA APOD oficial</a>
+        </div>
+
+      </div>
+    </footer>
   </div><!-- /wrap -->
 
 
 <script>
+  // ── Canvas de estrellas ──────────────────────────────────────
+  (function(){
+    const canvas = document.getElementById('stars');
+    const ctx = canvas.getContext('2d');
+    function draw(){
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const count = Math.floor((canvas.width * canvas.height) / 3800);
+      for (let i = 0; i < count; i++){
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height;
+        const r = Math.random() * 1.3 + 0.15;
+        const a = 0.25 + Math.random() * 0.75;
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${a})`;
+        ctx.fill();
+      }
+    }
+    draw();
+    window.addEventListener('resize', draw);
+  })();
+
   // Remove splash from DOM once its fade-out animation ends
   (function(){
     const s = document.getElementById('splash');
@@ -650,29 +770,27 @@
         return;
       }
       ORIGINAL = data;
-      // Aviso fallback
-const existing = document.getElementById('fallbackNote');
-if (existing) existing.remove();
-if (data.fallback) {
-  const note = document.createElement('div');
-  note.id = 'fallbackNote';
-  note.style = 'font-size:12px; color:var(--muted); margin-top:6px;';
-  note.textContent = '⚠️ La imagen de hoy aún no está disponible, mostrando la más reciente.';
-  document.getElementById('err').after(note);
-}
+      const existing = document.getElementById('fallbackNote');
+      if (existing) existing.remove();
+      if (data.fallback) {
+        const note = document.createElement('div');
+        note.id = 'fallbackNote';
+        note.style = 'font-size:12px; color:var(--muted); margin-top:6px;';
+        note.textContent = '⚠️ La imagen de hoy aún no está disponible, mostrando la más reciente.';
+        document.getElementById('err').after(note);
+      }
       renderMedia();
       await renderText();
     } catch (e) {
       errBox.textContent = LANG==='es' ? 'No se pudo cargar APOD (error de red)' : 'Could not load APOD (network error)';
       document.getElementById('title').textContent = 'Error';
     }
-  
   }
 
   // ── Buscador ─────────────────────────────────────────────────
   function normalize(s){
     return (s||'').toString().trim().toLowerCase()
-      .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+      .normalize('NFD').replace(/[̀-ͯ]/g,'');
   }
 
   function mapQueryToEnglish(q){
@@ -699,7 +817,7 @@ if (data.fallback) {
     for (const d of dict){
       if (d.keys.some(k => x.includes(normalize(k)))) return d.en;
     }
-    return x; // búsqueda libre en inglés si no matchea
+    return x;
   }
 
   async function runSearch(){
@@ -708,7 +826,6 @@ if (data.fallback) {
 
     const term = mapQueryToEnglish(raw);
 
-    // Mostrar galería y loading
     const wrap    = document.getElementById('galleryWrap');
     const grid    = document.getElementById('galleryGrid');
     const loading = document.getElementById('galleryLoading');
@@ -721,7 +838,6 @@ if (data.fallback) {
     titleEl.textContent = LANG==='es' ? `Buscando "${raw}"…` : `Searching "${raw}"…`;
     hintEl.textContent = '';
 
-    // Scroll suave a la galería
     wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
     try {
@@ -796,7 +912,7 @@ if (data.fallback) {
   load();
 </script>
   <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#8b6b3d">
+<meta name="theme-color" content="#07091a">
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {

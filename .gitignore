@@ -1,0 +1,9 @@
+# Notas y configuración local (no subir a GitHub)
+.claude/
+
+# Dependencias
+node_modules/
+
+# Entorno local
+.env
+.env.local
