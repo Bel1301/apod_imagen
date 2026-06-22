@@ -376,6 +376,7 @@
     width:100%; height:100%;
     object-fit:cover; object-position:top center;
     display:block;
+    filter: url('#sharpEarth') contrast(1.08) saturate(1.05);
   }
   @keyframes splashFadeUp{
     from{ opacity:0; transform:translateY(20px); }
@@ -393,6 +394,17 @@
 </head>
 
 <body>
+  <!-- SVG sharpening filter for Earth image -->
+  <svg style="display:none;position:absolute" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs>
+      <filter id="sharpEarth" x="-5%" y="-5%" width="110%" height="110%">
+        <feConvolveMatrix order="3"
+          kernelMatrix="0 -0.7 0 -0.7 3.8 -0.7 0 -0.7 0"
+          preserveAlpha="true" edgeMode="duplicate"/>
+      </filter>
+    </defs>
+  </svg>
+
   <!-- Fondo de estrellas -->
   <canvas id="stars" aria-hidden="true"></canvas>
 
