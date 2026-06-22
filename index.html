@@ -4,10 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Horizon</title>
-  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=3">
-  <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png?v=3">
-  <link rel="shortcut icon" href="/icon-192.png?v=3">
-  <link rel="apple-touch-icon" href="/icon-192.png?v=3">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=4">
+  <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png?v=4">
+  <link rel="shortcut icon" href="/icon-192.png?v=4">
+  <link rel="apple-touch-icon" href="/icon-192.png?v=4">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;800&display=swap" rel="stylesheet">
@@ -50,36 +50,31 @@
     pointer-events:none;
   }
 
-  /* Tierra interactiva con parallax al cursor */
+  /* Tierra interactiva con parallax — banda full-bleed (punta a punta),
+     altura limitada para que en PC no sea gigante y se pueda scrollear. */
   #earthParallaxWrap{
     position:relative;
-    width:100%;
-    max-width:520px;          /* más chica en PC */
-    margin:48px auto 0;
+    width:100vw;
+    margin-left:calc(50% - 50vw);
+    margin-top:48px;
+    height:clamp(240px, 32vw, 440px);
     overflow:hidden;
     cursor:pointer;
-    /* Fondo igual al de la página: con mix-blend-mode:screen en la imagen,
-       el negro del espacio se vuelve este color → se funde y desaparece. */
-    background:#07091a;
+    display:flex;
+    align-items:center;
+    justify-content:center;
   }
   @media (max-width:600px){
-    #earthParallaxWrap{
-      max-width:none;
-      width:100vw;
-      margin:32px 0 0;
-      margin-left:calc(50% - 50vw);
-    }
+    #earthParallaxWrap{ height:clamp(200px, 56vw, 300px); margin-top:32px; }
   }
   #earthParallaxImg{
-    width:110%;
-    height:auto;
+    height:92%;
+    width:auto;
     display:block;
-    transform:translate(-5%, -5%) scale(1);
+    transform:scale(1);
     transition:transform 0.15s ease-out;
     will-change:transform;
-    filter:contrast(1.05) saturate(1.05);
-    /* El negro del espacio se funde con el fondo oscuro → solo se ve el globo */
-    mix-blend-mode:screen;
+    filter:contrast(1.04) saturate(1.04);
   }
   #earthGlow{
     position:absolute;
@@ -408,9 +403,9 @@
   @media(max-width:600px){ .splashEarthWrap{ height:38vh; } }
   .splashEarthImg{
     width:100%; height:100%;
-    object-fit:cover; object-position:top center;
+    object-fit:contain; object-position:center bottom;
     display:block;
-    filter: url('#sharpEarth') contrast(1.08) saturate(1.05);
+    filter:contrast(1.06) saturate(1.04);
   }
   @keyframes splashFadeUp{
     from{ opacity:0; transform:translateY(20px); }
@@ -428,17 +423,6 @@
 </head>
 
 <body>
-  <!-- SVG sharpening filter for Earth image -->
-  <svg style="display:none;position:absolute" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <defs>
-      <filter id="sharpEarth" x="-5%" y="-5%" width="110%" height="110%">
-        <feConvolveMatrix order="3"
-          kernelMatrix="0 -0.7 0 -0.7 3.8 -0.7 0 -0.7 0"
-          preserveAlpha="true" edgeMode="duplicate"/>
-      </filter>
-    </defs>
-  </svg>
-
   <!-- Fondo de estrellas -->
   <canvas id="stars" aria-hidden="true"></canvas>
 
@@ -449,7 +433,7 @@
       <div class="splashSub">Exploring the universe</div>
     </div>
     <div class="splashEarthWrap">
-      <img src="/tierra.png" alt="" class="splashEarthImg">
+      <img src="/tierra.png?v=4" alt="" class="splashEarthImg">
     </div>
   </div>
 
@@ -529,7 +513,7 @@
 
     <!-- Tierra interactiva con parallax al cursor -->
     <div id="earthParallaxWrap">
-      <img id="earthParallaxImg" src="/tierra.png" alt="Vista de la Tierra desde el espacio">
+      <img id="earthParallaxImg" src="/tierra.png?v=4" alt="Vista de la Tierra desde el espacio">
       <div id="earthGlow" aria-hidden="true"></div>
     </div>
 
@@ -537,7 +521,7 @@
       <div style="display:flex; flex-direction:column; align-items:center; gap:20px;">
 
         <div style="display:flex; align-items:center; gap:14px;">
-          <img src="/icon-192.png?v=3" alt="Horizon logo" width="48" height="48" style="display:block; background:transparent;">
+          <img src="/icon-192.png?v=4" alt="Horizon logo" width="48" height="48" style="display:block; background:transparent;">
           <span class="brandFont" style="font-size:22px; font-weight:800; color:var(--text); letter-spacing:4px; text-transform:uppercase;">Horizon</span>
         </div>
 
@@ -625,7 +609,7 @@
       const moveX = -relX * INTENSITY * 2;
       const moveY = -relY * INTENSITY * 2;
 
-      img.style.transform = `translate(calc(-5% + ${moveX}px), calc(-5% + ${moveY}px)) scale(${SCALE_HOVER})`;
+      img.style.transform = `translate(${moveX}px, ${moveY}px) scale(${SCALE_HOVER})`;
 
       // Mover el glow con el cursor
       const glowX = (relX + 0.5) * 100;
@@ -642,7 +626,7 @@
     function handleMouseLeave() {
       glow.style.opacity = '0';
       img.style.transition = 'transform 0.5s ease-out';
-      img.style.transform = 'translate(-5%, -5%) scale(1)';
+      img.style.transform = 'translate(0, 0) scale(1)';
     }
 
     wrap.addEventListener('mousemove', handleMouseMove);

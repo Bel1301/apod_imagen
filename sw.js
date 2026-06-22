@@ -1,4 +1,4 @@
-const CACHE = 'nasadaily-v2';
+const CACHE = 'nasadaily-v3';
 
 self.addEventListener('install', e => {
   self.skipWaiting();

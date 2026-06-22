@@ -3,6 +3,26 @@
 Todos los cambios notables de **Horizon** se documentan en este archivo.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.0.0/).
 
+## [2026-06-22] — Imágenes transparentes y banda Tierra
+
+### Added
+- **Logo y Tierra transparentes** (subidos por la usuaria, verificado alpha=0).
+  Cache-bust a `?v=4` en favicon, footer, manifest y `tierra.png`.
+
+### Changed
+- **`tierra.png` optimizada**: de 11.7 MB (3240×2160) a ~2.3 MB (1200×800)
+  manteniendo la transparencia. El archivo gigante no cargaba (imagen en blanco).
+- **Tierra parallax como banda full-bleed**: ancho completo (punta a punta) con
+  **altura limitada** (`clamp`) para que en PC no sea gigante y se pueda scrollear;
+  globo centrado con flexbox.
+- Se quitaron los hacks `mix-blend-mode:screen` + fondo `#07091a` (ya no hacen
+  falta con PNG transparente) y el filtro SVG `#sharpEarth` (sin uso).
+- Splash: la Tierra ahora usa `object-fit:contain` (el globo recortado se ve entero).
+
+### Fixed
+- **Fecha de hoy en móvil**: se fuerza recarga del `index.html` nuevo (SW cache
+  `nasadaily-v3`) para que tome el cálculo de fecha **local** ya aplicado.
+
 ## [2026-06-21] — Ajustes 2
 
 ### Fixed
