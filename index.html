@@ -171,12 +171,6 @@
     flex-direction:column;
   }
   .figure img{ width:100%; height:auto; display:block; }
-  .apodImg{ opacity:0; transition:opacity .4s ease; }
-  .apodImg.loaded{ opacity:1; }
-  .imgLoading{
-    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    color:var(--muted); font-size:13px; pointer-events:none;
-  }
   .figure iframe, .figure video{
     width:100%; height:520px; border:0; display:block;
   }
@@ -653,28 +647,15 @@
     const src = ORIGINAL.url;
 
     if (type === 'image') {
-      const loader = document.createElement('div');
-      loader.className = 'imgLoading';
-      loader.textContent = LANG === 'es' ? 'Cargando imagen…' : 'Loading image…';
-      mediaBox.appendChild(loader);
-
       const img = document.createElement('img');
-      img.className = 'apodImg';
       img.alt = ORIGINAL.title || '';
       img.loading = 'eager';
       let triedHd = false;
-      img.onload = () => { loader.remove(); img.classList.add('loaded'); };
       img.onerror = () => {
         if (!triedHd && ORIGINAL.hdurl && ORIGINAL.hdurl !== ORIGINAL.url) {
           triedHd = true;
           img.src = ORIGINAL.hdurl;
-          return;
         }
-        loader.remove();
-        const msg = document.createElement('p');
-        msg.style = 'color:var(--muted);font-size:13px;padding:24px;text-align:center;';
-        msg.textContent = LANG === 'es' ? 'No se pudo cargar la imagen.' : 'Image could not be loaded.';
-        mediaBox.appendChild(msg);
       };
       img.src = ORIGINAL.url || ORIGINAL.hdurl;
       mediaBox.appendChild(img);
