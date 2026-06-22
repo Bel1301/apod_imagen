@@ -20,9 +20,10 @@ export default async function handler(req, res) {
   // Rango de fechas: una sola consulta bulk (rápida y fiable).
   // El parámetro `count` de NASA trae N días aleatorios uno por uno y es
   // demasiado lento (supera el timeout). Un rango se resuelve en una query.
+  // Últimos 30 días para que sea bien rápido.
   const end   = new Date();
   const start = new Date();
-  start.setDate(start.getDate() - 365);
+  start.setDate(start.getDate() - 30);
   const fmt = d => d.toISOString().split('T')[0];
 
   try {

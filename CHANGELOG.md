@@ -3,6 +3,20 @@
 Todos los cambios notables de **Horizon** se documentan en este archivo.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.0.0/).
 
+## [2026-06-21] — Ajustes 2
+
+### Fixed
+- **Buscador:** rango reducido a **últimos 30 días** (consulta mínima y rápida).
+- **Fecha por defecto en móvil:** ahora usa la fecha **local** (no UTC), evitando
+  que por zona horaria muestre el día equivocado.
+
+### Changed
+- **Tierra parallax más chica en PC** (`max-width:520px`, centrada); full-bleed
+  solo en móvil.
+- **Fondo negro de la Tierra eliminado de verdad:** el contenedor lleva el color
+  de la página (`#07091a`) y con `mix-blend-mode:screen` el negro del espacio se
+  funde con él (antes el blend no surtía efecto porque `.wrap` lo aislaba).
+
 ## [2026-06-21] — Fixes buscador, imagen móvil y Tierra
 
 ### Fixed

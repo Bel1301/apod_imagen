@@ -50,15 +50,25 @@
     pointer-events:none;
   }
 
-  /* Tierra interactiva con parallax al cursor — full-bleed punta a punta */
+  /* Tierra interactiva con parallax al cursor */
   #earthParallaxWrap{
     position:relative;
-    width:100vw;
-    margin-left:calc(50% - 50vw);
-    margin-top:48px;
+    width:100%;
+    max-width:520px;          /* más chica en PC */
+    margin:48px auto 0;
     overflow:hidden;
     cursor:pointer;
-    perspective:1000px;
+    /* Fondo igual al de la página: con mix-blend-mode:screen en la imagen,
+       el negro del espacio se vuelve este color → se funde y desaparece. */
+    background:#07091a;
+  }
+  @media (max-width:600px){
+    #earthParallaxWrap{
+      max-width:none;
+      width:100vw;
+      margin:32px 0 0;
+      margin-left:calc(50% - 50vw);
+    }
   }
   #earthParallaxImg{
     width:110%;
@@ -873,7 +883,10 @@
   async function load(){
     syncLangUI();
     const date = getDateFromUrl();
-    const today = new Date().toISOString().split('T')[0];
+    // Fecha LOCAL (no UTC): evita que en móvil muestre el día equivocado
+    // por diferencia de zona horaria (toISOString devuelve UTC).
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
     document.getElementById('d').value = date || today;
 
     const cacheKey = date || 'latest';
