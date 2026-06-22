@@ -2,8 +2,5 @@
   "type": "module",
   "engines": {
     "node": "24.x"
-  },
-  "dependencies": {
-    "three": "^0.184.0"
   }
 }
