@@ -329,9 +329,10 @@
   @media(max-width:600px){ .splashEarthWrap{ height:55vh; } }
   .splashEarthImg{
     width:100%; height:100%;
-    object-fit:contain; object-position:center bottom;
+    object-fit:cover; object-position:center bottom;
     display:block;
   }
+  @media(max-width:600px){ .splashEarthImg{ object-fit:contain; } }
   @keyframes splashFadeUp{
     from{ opacity:0; transform:translateY(20px); }
     to{   opacity:1; transform:translateY(0); }
