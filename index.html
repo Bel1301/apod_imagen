@@ -27,7 +27,7 @@
     margin:0;
     background: radial-gradient(ellipse 130% 55% at 50% -5%, #162040 0%, #07091a 65%);
     color:var(--text);
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
     min-height:100vh;
   }
 
@@ -45,7 +45,7 @@
     bottom:0;
     left:0;
     right:0;
-    height:280px;
+    height:360px;
     overflow:hidden;
     z-index:0;
     pointer-events:none;
@@ -54,21 +54,24 @@
     content:'';
     position:absolute;
     top:0; left:0; right:0;
-    height:140px;
+    height:160px;
     background:linear-gradient(to bottom, #07091a 0%, transparent 100%);
     z-index:1;
   }
   #earthWrap img{
     width:100%;
-    height:auto;
+    height:100%;
+    object-fit:cover;
+    object-position:top center;
     display:block;
+    filter: url('#sharpEarth') contrast(1.08) saturate(1.05);
   }
   @media (max-width:600px){
-    #earthWrap{ height:175px; }
+    #earthWrap{ height:220px; }
     #earthWrap::after{ height:80px; }
   }
 
-  .wrap{ max-width:980px; margin:0 auto; padding:28px 18px 310px; position:relative; z-index:1; }
+  .wrap{ max-width:980px; margin:0 auto; padding:28px 18px 400px; position:relative; z-index:1; }
 
   .masthead{
     display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:18px;
@@ -410,7 +413,7 @@
 
   <!-- Planeta Tierra asomándose desde abajo -->
   <div id="earthWrap" aria-hidden="true">
-    <img src="/tierra.webp" alt="">
+    <img src="/tierra.png" alt="">
   </div>
 
   <!-- Splash screen -->
@@ -420,7 +423,7 @@
       <div class="splashSub">Exploring the universe</div>
     </div>
     <div class="splashEarthWrap">
-      <img src="/tierra.webp" alt="" class="splashEarthImg">
+      <img src="/tierra.png" alt="" class="splashEarthImg">
     </div>
   </div>
 
@@ -498,25 +501,25 @@
       <div id="galleryGrid"></div>
     </div>
 
-    <footer style="border-top:0.5px solid rgba(200,149,106,0.2); margin-top:48px; padding:32px 0 28px; text-align:center; font-family:inherit;">
-      <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+    <footer style="border-top:0.5px solid rgba(200,149,106,0.2); margin-top:64px; padding:48px 0 40px; text-align:center; font-family:inherit;">
+      <div style="display:flex; flex-direction:column; align-items:center; gap:20px;">
 
-        <div style="display:flex; align-items:center; gap:10px;">
-          <div style="width:32px; height:32px; border-radius:50%; border:1px solid rgba(200,149,106,.45); background:rgba(200,149,106,.10); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#c8956a; letter-spacing:.5px;">MBP</div>
-          <span style="font-size:14px; font-weight:800; color:var(--text); letter-spacing:3px; text-transform:uppercase;">Horizon</span>
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div style="width:48px; height:48px; border-radius:50%; border:1.5px solid rgba(200,149,106,.45); background:rgba(200,149,106,.10); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; color:#c8956a; letter-spacing:.5px;">MBP</div>
+          <span style="font-size:22px; font-weight:800; color:var(--text); letter-spacing:4px; text-transform:uppercase;">Horizon</span>
         </div>
 
-        <div style="width:40px; height:0.5px; background:rgba(200,149,106,.35);"></div>
+        <div style="width:56px; height:0.5px; background:rgba(200,149,106,.35);"></div>
 
-        <p style="margin:0; font-size:12px; color:var(--muted); line-height:1.6; max-width:420px;">
+        <p style="margin:0; font-size:15px; color:var(--muted); line-height:1.75; max-width:520px;">
           Interface built on the NASA API.<br>
           Astronomical images and content belong to their respective authors.
         </p>
 
-        <div style="display:flex; align-items:center; gap:16px; margin-top:4px;">
-          <span style="font-size:11px; color:var(--muted);">© 2026 MBP · All rights reserved</span>
+        <div style="display:flex; align-items:center; gap:20px; margin-top:4px;">
+          <span style="font-size:13px; color:var(--muted);">© 2026 MBP · All rights reserved</span>
           <span style="color:rgba(200,149,106,.3);">·</span>
-          <a href="https://apod.nasa.gov" target="_blank" rel="noopener noreferrer" style="font-size:11px; color:var(--accent); text-decoration:none; opacity:.85;">NASA APOD official</a>
+          <a href="https://apod.nasa.gov" target="_blank" rel="noopener noreferrer" style="font-size:13px; color:var(--accent); text-decoration:none; opacity:.85;">NASA APOD official</a>
         </div>
 
       </div>
