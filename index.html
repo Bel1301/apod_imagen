@@ -4,9 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Horizon</title>
-  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
-  <link rel="shortcut icon" href="/icon-192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=2">
+  <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png?v=2">
+  <link rel="shortcut icon" href="/icon-192.png?v=2">
+  <link rel="apple-touch-icon" href="/icon-192.png?v=2">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;800&display=swap" rel="stylesheet">
@@ -27,7 +28,7 @@
     margin:0;
     background: radial-gradient(ellipse 130% 55% at 50% -5%, #162040 0%, #07091a 65%);
     color:var(--text);
-    font-family: 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
     min-height:100vh;
   }
 
@@ -363,7 +364,6 @@
     text-align:center; line-height:1;
   }
   .splashSub{
-    font-family:'Space Grotesk', ui-sans-serif, sans-serif;
     font-weight:400;
     font-size:clamp(13px,1.8vw,20px);
     color:rgba(255,255,255,.75);
@@ -505,7 +505,7 @@
       <div style="display:flex; flex-direction:column; align-items:center; gap:20px;">
 
         <div style="display:flex; align-items:center; gap:14px;">
-          <div style="width:48px; height:48px; border-radius:50%; border:1.5px solid rgba(200,149,106,.45); background:rgba(200,149,106,.10); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; color:#c8956a; letter-spacing:.5px;">MBP</div>
+          <img src="/icon-192.png" alt="Horizon logo" width="48" height="48" style="display:block;">
           <span style="font-size:22px; font-weight:800; color:var(--text); letter-spacing:4px; text-transform:uppercase;">Horizon</span>
         </div>
 
@@ -750,41 +750,76 @@
     document.getElementById('explanation').textContent = explanation;
   }
 
+  // ── Cache de cliente (stale-while-revalidate) ───────────────
+  // Muestra al instante la última respuesta guardada y revalida en
+  // segundo plano, eliminando la latencia de espera por la API.
+  const APOD_CACHE_PREFIX = 'apodCache:';
+
+  function readApodCache(key){
+    try {
+      const raw = localStorage.getItem(APOD_CACHE_PREFIX + key);
+      return raw ? JSON.parse(raw) : null;
+    } catch (_) { return null; }
+  }
+  function writeApodCache(key, data){
+    try { localStorage.setItem(APOD_CACHE_PREFIX + key, JSON.stringify(data)); } catch (_) {}
+  }
+
+  function applyApod(data){
+    ORIGINAL = data;
+    const existing = document.getElementById('fallbackNote');
+    if (existing) existing.remove();
+    if (data.fallback) {
+      const note = document.createElement('div');
+      note.id = 'fallbackNote';
+      note.style = 'font-size:12px; color:var(--muted); margin-top:6px;';
+      note.textContent = LANG==='es'
+        ? '⚠️ La imagen de hoy aún no está disponible, mostrando la más reciente.'
+        : "⚠️ Today's image is not yet available, showing the most recent.";
+      document.getElementById('err').after(note);
+    }
+    renderMedia();
+    renderText();
+  }
+
   // ── Carga inicial ────────────────────────────────────────────
   async function load(){
     syncLangUI();
     const date = getDateFromUrl();
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('d').value = date || today;
+
+    const cacheKey = date || 'latest';
     const apiUrl = new URL('/api/apod', window.location.origin);
     if (date) apiUrl.searchParams.set('date', date);
     const errBox = document.getElementById('err');
     errBox.textContent = '';
+
+    // 1) Render instantáneo desde cache (si existe) — sin esperar la red
+    const cached = readApodCache(cacheKey);
+    if (cached) applyApod(cached);
+
+    // 2) Revalidar contra la API en segundo plano
     try {
       const r = await fetch(apiUrl.toString(), { cache: 'no-store' });
       const data = await r.json();
       if (!r.ok || data?.error) {
-        errBox.textContent = data?.error || (LANG==='es' ? 'Error consultando la API' : 'Error fetching the API');
-        document.getElementById('title').textContent = 'Error';
+        if (!cached) {
+          errBox.textContent = data?.error || (LANG==='es' ? 'Error consultando la API' : 'Error fetching the API');
+          document.getElementById('title').textContent = 'Error';
+        }
         return;
       }
-      ORIGINAL = data;
-      const existing = document.getElementById('fallbackNote');
-      if (existing) existing.remove();
-      if (data.fallback) {
-        const note = document.createElement('div');
-        note.id = 'fallbackNote';
-        note.style = 'font-size:12px; color:var(--muted); margin-top:6px;';
-        note.textContent = LANG==='es'
-          ? '⚠️ La imagen de hoy aún no está disponible, mostrando la más reciente.'
-          : "⚠️ Today's image is not yet available, showing the most recent.";
-        document.getElementById('err').after(note);
+      writeApodCache(cacheKey, data);
+      // Re-render solo si el contenido cambió respecto a lo ya mostrado
+      if (!cached || cached.date !== data.date || cached.url !== data.url) {
+        applyApod(data);
       }
-      renderMedia();
-      await renderText();
     } catch (e) {
-      errBox.textContent = LANG==='es' ? 'No se pudo cargar APOD (error de red)' : 'Could not load APOD (network error)';
-      document.getElementById('title').textContent = 'Error';
+      if (!cached) {
+        errBox.textContent = LANG==='es' ? 'No se pudo cargar APOD (error de red)' : 'Could not load APOD (network error)';
+        document.getElementById('title').textContent = 'Error';
+      }
     }
   }
 
