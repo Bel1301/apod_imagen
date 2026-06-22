@@ -16,13 +16,18 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
+  // Dejar pasar requests cross-origin directamente al navegador.
+  // El SW no puede hacer fetch() a dominios externos por la CSP,
+  // y cachear respuestas opacas es unreliable.
+  if (url.origin !== self.location.origin) return;
+
   // Nunca cachear las llamadas a la API
   if (url.pathname.startsWith('/api/')) {
     e.respondWith(fetch(e.request));
     return;
   }
 
-  // Para el resto, red primero, cache como fallback
+  // Para assets propios, red primero, cache como fallback
   e.respondWith(
     fetch(e.request)
       .then(res => {
