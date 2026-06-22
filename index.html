@@ -22,6 +22,10 @@
     --border:rgba(255,255,255,.1);
     --card:rgba(255,255,255,.07);
     --card2:rgba(255,255,255,.03);
+    /* Azul para botones minimalistas (texto azul sobre fondo natural) */
+    --blue:#8fb3ff;
+    --blue-soft:rgba(143,179,255,.10);
+    --blue-border:rgba(143,179,255,.28);
   }
 
   body{
@@ -40,39 +44,37 @@
     pointer-events:none;
   }
 
-  /* Tierra asomándose desde abajo */
-  #earthWrap{
-    position:fixed;
-    bottom:0;
-    left:0;
-    right:0;
-    height:360px;
-    overflow:hidden;
-    z-index:0;
-    pointer-events:none;
-  }
-  #earthWrap::after{
-    content:'';
-    position:absolute;
-    top:0; left:0; right:0;
-    height:160px;
-    background:linear-gradient(to bottom, #07091a 0%, transparent 100%);
-    z-index:1;
-  }
-  #earthWrap img{
+  /* Tierra interactiva con parallax al cursor */
+  #earthParallaxWrap{
+    position:relative;
     width:100%;
-    height:100%;
-    object-fit:cover;
-    object-position:top center;
-    display:block;
-    filter: url('#sharpEarth') contrast(1.08) saturate(1.05);
+    max-width:900px;
+    margin:48px auto 0;
+    border-radius:20px;
+    overflow:hidden;
+    cursor:pointer;
+    perspective:1000px;
   }
-  @media (max-width:600px){
-    #earthWrap{ height:220px; }
-    #earthWrap::after{ height:80px; }
+  #earthParallaxImg{
+    width:110%;
+    height:auto;
+    display:block;
+    transform:translate(-5%, -5%) scale(1);
+    transition:transform 0.15s ease-out;
+    will-change:transform;
+    filter:contrast(1.05) saturate(1.05);
+  }
+  #earthGlow{
+    position:absolute;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:radial-gradient(circle 250px at 50% 50%, rgba(255,255,255,0.08), transparent 70%);
+    pointer-events:none;
+    opacity:0;
+    transition:opacity 0.3s ease;
   }
 
-  .wrap{ max-width:980px; margin:0 auto; padding:28px 18px 400px; position:relative; z-index:1; }
+  .wrap{ max-width:980px; margin:0 auto; padding:28px 18px 28px; position:relative; z-index:1; }
 
   .masthead{
     display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:18px;
@@ -109,18 +111,17 @@
     width:20px; height:14px; border-radius:3px; display:block;
   }
   .flagBtn.active{
-    outline:2px solid rgba(200,149,106,.38);
-    border-color:rgba(200,149,106,.55);
+    outline:2px solid rgba(143,179,255,.38);
+    border-color:var(--blue-border);
   }
 
   .badge{
     border:1px solid var(--border);
-    padding:10px 12px;
-    border-radius:999px;
-    background:rgba(255,255,255,.07);
+    padding:12px 14px;
+    border-radius:12px;
+    background:transparent;
     width:fit-content;
     position:relative;
-    backdrop-filter:blur(10px);
   }
   .badgeTop{ text-align:center; width:100%; }
 
@@ -129,25 +130,35 @@
   }
 
   .dateInput{
-    padding:6px 10px;
-    border-radius:999px;
-    border:1px solid rgba(255,255,255,.15);
-    background:rgba(255,255,255,.08);
+    padding:8px 12px;
+    border-radius:8px;
+    border:1px solid var(--border);
+    background:transparent;
     color:var(--text);
     outline:none;
     color-scheme:dark;
-  }
-
-  .dateBtn{
-    padding:6px 12px;
-    border-radius:999px;
-    border:1px solid rgba(200,149,106,.55);
-    background:rgba(200,149,106,.12);
-    color:var(--text);
-    cursor:pointer;
+    font:inherit;
     font-size:14px;
   }
-  .dateBtn:hover{ background:rgba(200,149,106,.22); }
+  .dateInput:focus{ border-color:var(--blue-border); }
+
+  /* ── Botones minimalistas: fondo natural, texto azul ── */
+  /* Primary: leve relleno azul translúcido */
+  .dateBtn{
+    padding:8px 16px;
+    border-radius:8px;
+    border:1px solid var(--blue-border);
+    background:var(--blue-soft);
+    color:var(--blue);
+    cursor:pointer;
+    font:inherit;
+    font-size:14px;
+    transition:background .15s ease, border-color .15s ease;
+  }
+  .dateBtn:hover{
+    background:rgba(143,179,255,.18);
+    border-color:var(--blue);
+  }
 
   /* Buscador */
   .searchRow{
@@ -160,18 +171,17 @@
     position:absolute; left:12px; top:50%; transform:translateY(-50%); opacity:.65; pointer-events:none;
   }
   .searchInput{
-    width:100%; padding:10px 12px 10px 38px;
-    border-radius:999px;
-    border:1px solid rgba(255,255,255,.15);
-    background:rgba(255,255,255,.08);
+    width:100%; padding:10px 14px 10px 38px;
+    border-radius:8px;
+    border:1px solid var(--border);
+    background:transparent;
     outline:none; color:var(--text);
-    font-size:14px;
+    font:inherit; font-size:14px;
     box-sizing:border-box;
   }
   .searchInput::placeholder{ color:var(--muted); }
   .searchInput:focus{
-    border-color:rgba(200,149,106,.55);
-    background:rgba(255,255,255,.12);
+    border-color:var(--blue-border);
   }
 
   .card{
@@ -229,18 +239,25 @@
 
   .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
 
+  /* Ghost/Text button: sin relleno, solo texto azul */
   .btn{
-    display:inline-block; padding:10px 12px; border-radius:12px;
-    border:1px solid var(--border); color:var(--text);
-    text-decoration:none; font-size:13px;
-    background:rgba(255,255,255,.08);
+    display:inline-block; padding:9px 14px; border-radius:8px;
+    border:1px solid transparent; color:var(--blue);
+    text-decoration:none; font:inherit; font-size:13px;
+    background:transparent;
     cursor:pointer;
+    transition:background .15s ease, border-color .15s ease;
   }
+  .btn:hover{ background:var(--blue-soft); }
+  /* Primary button: leve relleno azul translúcido con borde */
   .btn.primary{
-    border-color:rgba(200,149,106,.55);
-    background:rgba(200,149,106,.12);
+    border-color:var(--blue-border);
+    background:var(--blue-soft);
   }
-  .btn:hover{ background:rgba(255,255,255,.14); }
+  .btn.primary:hover{
+    background:rgba(143,179,255,.18);
+    border-color:var(--blue);
+  }
 
   .error{
     margin-top:10px; color:#fc8181; font-size:12px;
@@ -411,11 +428,6 @@
   <!-- Fondo de estrellas -->
   <canvas id="stars" aria-hidden="true"></canvas>
 
-  <!-- Planeta Tierra asomándose desde abajo -->
-  <div id="earthWrap" aria-hidden="true">
-    <img src="/tierra.png" alt="">
-  </div>
-
   <!-- Splash screen -->
   <div id="splash" aria-hidden="true">
     <div class="splashTextBlock">
@@ -501,6 +513,12 @@
       <div id="galleryGrid"></div>
     </div>
 
+    <!-- Tierra interactiva con parallax al cursor -->
+    <div id="earthParallaxWrap">
+      <img id="earthParallaxImg" src="/tierra.png" alt="Vista de la Tierra desde el espacio">
+      <div id="earthGlow" aria-hidden="true"></div>
+    </div>
+
     <footer style="border-top:0.5px solid rgba(200,149,106,0.2); margin-top:64px; padding:48px 0 40px; text-align:center; font-family:inherit;">
       <div style="display:flex; flex-direction:column; align-items:center; gap:20px;">
 
@@ -564,6 +582,59 @@
     s.addEventListener('animationend', function(e){
       if (e.animationName === 'splashOut') s.remove();
     });
+  })();
+
+  // ── Parallax de la Tierra con el cursor ──────────────────────
+  (function () {
+    const wrap = document.getElementById('earthParallaxWrap');
+    const img  = document.getElementById('earthParallaxImg');
+    const glow = document.getElementById('earthGlow');
+    if (!wrap || !img || !glow) return;
+
+    const INTENSITY = 18;       // px de desplazamiento máximo
+    const SCALE_HOVER = 1.06;   // zoom leve al hacer hover
+
+    let bounds = null;
+
+    function updateBounds() {
+      bounds = wrap.getBoundingClientRect();
+    }
+
+    function handleMouseMove(e) {
+      if (!bounds) updateBounds();
+
+      // Posición del mouse relativa al centro del contenedor (-0.5 a 0.5)
+      const relX = (e.clientX - bounds.left) / bounds.width - 0.5;
+      const relY = (e.clientY - bounds.top) / bounds.height - 0.5;
+
+      // Desplazamiento invertido para efecto de profundidad
+      const moveX = -relX * INTENSITY * 2;
+      const moveY = -relY * INTENSITY * 2;
+
+      img.style.transform = `translate(calc(-5% + ${moveX}px), calc(-5% + ${moveY}px)) scale(${SCALE_HOVER})`;
+
+      // Mover el glow con el cursor
+      const glowX = (relX + 0.5) * 100;
+      const glowY = (relY + 0.5) * 100;
+      glow.style.background = `radial-gradient(circle 250px at ${glowX}% ${glowY}%, rgba(255,255,255,0.10), transparent 70%)`;
+    }
+
+    function handleMouseEnter() {
+      updateBounds();
+      glow.style.opacity = '1';
+      img.style.transition = 'transform 0.1s ease-out';
+    }
+
+    function handleMouseLeave() {
+      glow.style.opacity = '0';
+      img.style.transition = 'transform 0.5s ease-out';
+      img.style.transform = 'translate(-5%, -5%) scale(1)';
+    }
+
+    wrap.addEventListener('mousemove', handleMouseMove);
+    wrap.addEventListener('mouseenter', handleMouseEnter);
+    wrap.addEventListener('mouseleave', handleMouseLeave);
+    window.addEventListener('resize', updateBounds);
   })();
 
   // HTML escape — prevents XSS when inserting NASA data into innerHTML

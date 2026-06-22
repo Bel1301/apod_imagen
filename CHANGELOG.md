@@ -15,6 +15,12 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.0.0/).
 - `CHANGELOG.md` (este archivo).
 
 ### Changed
+- **Botones minimalistas** con sistema Primary + Ghost/Text: fondo natural
+  translúcido y **texto azul** (`#8fb3ff`). El rectángulo del date, el input de
+  fecha y el buscador también se simplificaron (sin glass/blur, bordes finos).
+- **Tierra interactiva con parallax al cursor**: reemplaza el fondo fijo. La imagen
+  sigue el movimiento del mouse con un glow sutil; en mobile se muestra estática.
+  Ubicada como sección destacada antes del footer.
 - **Tipografía**: la app vuelve a la fuente de sistema; **Space Grotesk** queda
   reservada exclusivamente para el título **HORIZON** de la pantalla de bienvenida.
 - Footer ampliado (logo 48px, textos 13–22px, mayor espaciado) y siempre en inglés.
