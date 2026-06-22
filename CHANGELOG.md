@@ -3,6 +3,21 @@
 Todos los cambios notables de **Horizon** se documentan en este archivo.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.0.0/).
 
+## [2026-06-21] — Fixes buscador, imagen móvil y Tierra
+
+### Fixed
+- **Buscador (error):** se reemplazó `count=200` (que NASA resuelve trayendo 200
+  días aleatorios uno por uno → timeout) por una consulta de **rango de fechas**
+  (último año) en una sola query. Timeout 15s + `maxDuration` 30s + manejo de 504.
+- **Imagen del día rota en móvil:** el preview ahora usa la `url` estándar (la
+  `hdurl` puede pesar varios MB y fallar en móvil), con fallback automático a
+  `hdurl` si la estándar falla.
+
+### Changed
+- Links **"Open on NASA"** y **"NASA APOD official"** ahora en **crema** (antes naranja).
+- **Tierra parallax sin fondo negro:** `mix-blend-mode:screen` funde el negro del
+  espacio con el fondo oscuro, dejando ver las estrellas detrás del globo.
+
 ## [2026-06-21] — Ajustes finales
 
 ### Changed
