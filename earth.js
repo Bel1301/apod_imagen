@@ -15,72 +15,83 @@ export class EarthGlobe {
   }
 
   async init() {
-    const w = this._cv.clientWidth  || 800;
-    const h = this._cv.clientHeight || 600;
+    try {
+      // Fast support check before loading three.js renderer
+      const test = document.createElement('canvas');
+      if (!test.getContext('webgl2') && !navigator.gpu) {
+        console.warn('[EarthGlobe] WebGL2/WebGPU not available');
+        return this;
+      }
 
-    this._renderer = new THREE.WebGPURenderer({ canvas: this._cv, antialias: true, alpha: true });
-    this._renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    this._renderer.setSize(w, h, false);
+      const w = this._cv.clientWidth  || 800;
+      const h = this._cv.clientHeight || 600;
 
-    try { await this._renderer.init(); }
-    catch { return this; }
+      // No explicit await renderer.init() — renderer initializes lazily
+      // on the first render() call via setAnimationLoop, matching three.js examples
+      this._renderer = new THREE.WebGPURenderer({ canvas: this._cv, antialias: true, alpha: true });
+      this._renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      this._renderer.setSize(w, h, false);
 
-    this.supported  = true;
-    this._scene     = new THREE.Scene();
-    this._camera    = new THREE.PerspectiveCamera(25, w / h, 0.1, 100);
-    this._camera.position.set(0, 0, 4.5);
+      this._scene  = new THREE.Scene();
+      this._camera = new THREE.PerspectiveCamera(25, w / h, 0.1, 100);
+      this._camera.position.set(0, 0, 4.5);
 
-    const sun = new THREE.DirectionalLight('#ffffff', 2);
-    sun.position.set(0, 0, 3);
-    this._scene.add(sun);
+      const sun = new THREE.DirectionalLight('#ffffff', 2);
+      sun.position.set(0, 0, 3);
+      this._scene.add(sun);
 
-    const atmDay      = uniform(color('#4db2ff'));
-    const atmTwilight = uniform(color('#bc490b'));
-    const roughLow    = uniform(0.25);
-    const roughHigh   = uniform(0.35);
+      const atmDay      = uniform(color('#4db2ff'));
+      const atmTwilight = uniform(color('#bc490b'));
+      const roughLow    = uniform(0.25);
+      const roughHigh   = uniform(0.35);
 
-    const loader = new THREE.TextureLoader();
-    const [dayTex, nightTex, bumpTex] = await Promise.all([
-      this._loadTex(loader, '/textures/earth_day_4096.jpg',                   true),
-      this._loadTex(loader, '/textures/earth_night_4096.jpg',                 true),
-      this._loadTex(loader, '/textures/earth_bump_roughness_clouds_4096.jpg', false),
-    ]);
+      const loader = new THREE.TextureLoader();
+      const [dayTex, nightTex, bumpTex] = await Promise.all([
+        this._loadTex(loader, '/textures/earth_day_4096.jpg',                   true),
+        this._loadTex(loader, '/textures/earth_night_4096.jpg',                 true),
+        this._loadTex(loader, '/textures/earth_bump_roughness_clouds_4096.jpg', false),
+      ]);
 
-    const viewDir   = positionWorld.sub(cameraPosition).normalize();
-    const fresnel   = viewDir.dot(normalWorldGeometry).abs().oneMinus().toVar();
-    const sunOrient = normalWorldGeometry.dot(normalize(sun.position)).toVar();
-    const atmColor  = mix(atmTwilight, atmDay, sunOrient.smoothstep(-0.25, 0.75));
+      const viewDir   = positionWorld.sub(cameraPosition).normalize();
+      const fresnel   = viewDir.dot(normalWorldGeometry).abs().oneMinus().toVar();
+      const sunOrient = normalWorldGeometry.dot(normalize(sun.position)).toVar();
+      const atmColor  = mix(atmTwilight, atmDay, sunOrient.smoothstep(-0.25, 0.75));
 
-    const mat       = new THREE.MeshStandardNodeMaterial();
-    const cloudsStr = texture(bumpTex, uv()).b.smoothstep(0.2, 1);
-    mat.colorNode   = mix(texture(dayTex), vec3(1), cloudsStr.mul(2));
-    const rough     = max(texture(bumpTex).g, step(0.01, cloudsStr));
-    mat.roughnessNode = rough.remap(0, 1, roughLow, roughHigh);
+      const mat       = new THREE.MeshStandardNodeMaterial();
+      const cloudsStr = texture(bumpTex, uv()).b.smoothstep(0.2, 1);
+      mat.colorNode   = mix(texture(dayTex), vec3(1), cloudsStr.mul(2));
+      const rough     = max(texture(bumpTex).g, step(0.01, cloudsStr));
+      mat.roughnessNode = rough.remap(0, 1, roughLow, roughHigh);
 
-    const night      = texture(nightTex);
-    const dayStr     = sunOrient.smoothstep(-0.25, 0.5);
-    const atmDayStr  = sunOrient.smoothstep(-0.5, 1);
-    const atmMix     = atmDayStr.mul(fresnel.pow(2)).clamp(0, 1);
-    let   finalOut   = mix(night.rgb, output.rgb, dayStr);
-    finalOut         = mix(finalOut, atmColor, atmMix);
-    mat.outputNode   = vec4(finalOut, output.a);
-    mat.normalNode   = bumpMap(max(texture(bumpTex).r, cloudsStr));
+      const night      = texture(nightTex);
+      const dayStr     = sunOrient.smoothstep(-0.25, 0.5);
+      const atmDayStr  = sunOrient.smoothstep(-0.5, 1);
+      const atmMix     = atmDayStr.mul(fresnel.pow(2)).clamp(0, 1);
+      let   finalOut   = mix(night.rgb, output.rgb, dayStr);
+      finalOut         = mix(finalOut, atmColor, atmMix);
+      mat.outputNode   = vec4(finalOut, output.a);
+      mat.normalNode   = bumpMap(max(texture(bumpTex).r, cloudsStr));
 
-    const geo    = new THREE.SphereGeometry(1, 64, 64);
-    this._globe  = new THREE.Mesh(geo, mat);
+      const geo    = new THREE.SphereGeometry(1, 64, 64);
+      this._globe  = new THREE.Mesh(geo, mat);
 
-    const atmMat  = new THREE.MeshBasicNodeMaterial({ side: THREE.BackSide, transparent: true });
-    const alpha   = fresnel.remap(0.73, 1, 1, 0).pow(3).mul(sunOrient.smoothstep(-0.5, 1));
-    atmMat.outputNode = vec4(atmColor, alpha);
-    const atm = new THREE.Mesh(geo, atmMat);
-    atm.scale.setScalar(1.04);
+      const atmMat  = new THREE.MeshBasicNodeMaterial({ side: THREE.BackSide, transparent: true });
+      const alpha   = fresnel.remap(0.73, 1, 1, 0).pow(3).mul(sunOrient.smoothstep(-0.5, 1));
+      atmMat.outputNode = vec4(atmColor, alpha);
+      const atm = new THREE.Mesh(geo, atmMat);
+      atm.scale.setScalar(1.04);
 
-    // Tilt group separates parallax rotation from auto-rotation
-    this._tiltGroup = new THREE.Group();
-    this._tiltGroup.add(this._globe, atm);
-    this._scene.add(this._tiltGroup);
+      // Tilt group separates parallax rotation from auto-rotation
+      this._tiltGroup = new THREE.Group();
+      this._tiltGroup.add(this._globe, atm);
+      this._scene.add(this._tiltGroup);
 
-    this._timer = new THREE.Timer();
+      this._clock = new THREE.Clock();
+      this.supported = true;
+
+    } catch (e) {
+      console.error('[EarthGlobe] init failed:', e);
+    }
     return this;
   }
 
@@ -133,8 +144,7 @@ export class EarthGlobe {
   }
 
   _tick() {
-    this._timer.update();
-    const d = this._timer.getDelta();
+    const d = this._clock.getDelta();
     if (this._autoRotate) this._globe.rotation.y += d * this._speed;
     this._tiltGroup.rotation.x += (this._tiltX - this._tiltGroup.rotation.x) * 0.08;
     this._tiltGroup.rotation.z += (this._tiltZ - this._tiltGroup.rotation.z) * 0.08;

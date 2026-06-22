@@ -63,11 +63,20 @@
 /* Tierra interactiva con parallax — banda full-bleed (punta a punta), altura limitada para que en PC no sea gigante y se pueda scrollear. */ 
 #earthParallaxWrap{ position:relative; width:100vw; margin-left:calc(50% - 50vw); margin-top:48px; height:clamp(340px, 46vw, 640px); 
   overflow:hidden; cursor:pointer; display:flex; align-items:center; justify-content:center; } @media (max-width:600px){ #earthParallaxWrap{ height:clamp(260px, 70vw, 420px); margin-top:32px; } } 
+  #earthParallaxFallback{
+  position:absolute;
+  top:50%; left:50%;
+  width:100%; height:100%;
+  transform:translate(-50%, -50%);
+  object-fit:cover;
+  object-position:center 30%;
+  display:block;
+}
   #earthParallaxCanvas{
   position:absolute;
   top:0; left:0;
   width:100%; height:100%;
-  display:block;
+  display:none;
 } #earthGlow{ position:absolute; top:0; left:0; width:100%; height:100%; 
       background:radial-gradient(circle 250px at 50% 50%, rgba(255,255,255,0.08), transparent 70%); pointer-events:none; opacity:0; 
       transition:opacity 0.3s ease; } .wrap{ max-width:980px; margin:0 auto; padding:28px 18px 28px; position:relative; z-index:1; } 
@@ -326,14 +335,21 @@
     letter-spacing:2px; text-align:center;
   }
   .splashEarthWrap{
+    position:relative;
     width:100%; flex-shrink:0;
     height:45vh; overflow:hidden;
     animation:earthSlideUp 1.4s cubic-bezier(.25,.85,.5,1) both;
   }
   @media(max-width:600px){ .splashEarthWrap{ height:38vh; } }
-  .splashEarthCanvas{
+  .splashEarthFallback{
     width:100%; height:100%;
+    object-fit:contain; object-position:center bottom;
     display:block;
+    filter:contrast(1.06) saturate(1.04);
+  }
+  .splashEarthCanvas{
+    position:absolute; top:0; left:0;
+    width:100%; height:100%;
   }
   @keyframes splashFadeUp{
     from{ opacity:0; transform:translateY(20px); }
@@ -361,7 +377,8 @@
       <div class="splashSub">Exploring the universe</div>
     </div>
     <div class="splashEarthWrap">
-      <canvas class="splashEarthCanvas" aria-hidden="true"></canvas>
+      <img src="/tierra.png?v=5" alt="" class="splashEarthFallback">
+      <canvas class="splashEarthCanvas" aria-hidden="true" style="display:none;position:absolute;top:0;left:0;width:100%;height:100%;"></canvas>
     </div>
   </div>
 
@@ -441,6 +458,7 @@
 
     <!-- Tierra interactiva con parallax al cursor -->
     <div id="earthParallaxWrap">
+      <img id="earthParallaxFallback" src="/tierra.png?v=5" alt="Vista de la Tierra desde el espacio">
       <canvas id="earthParallaxCanvas" aria-hidden="true"></canvas>
       <div id="earthGlow" aria-hidden="true"></div>
     </div>
@@ -917,17 +935,22 @@
   // ── Globo 3D — splash ──────────────────────────────────────────
   const splashCanvas = document.querySelector('.splashEarthCanvas');
   if (splashCanvas) {
+    const splashFallback = document.querySelector('.splashEarthFallback');
     const splashGlobe = new EarthGlobe(splashCanvas, { autoRotateSpeed: 0.02 });
-    splashGlobe.init().then(() => {
-      if (!splashGlobe.supported) return;
-      splashGlobe.start();
-      const splash = document.getElementById('splash');
-      if (splash) {
-        splash.addEventListener('animationend', e => {
-          if (e.animationName === 'splashOut') splashGlobe.dispose();
-        });
-      }
-    });
+    splashGlobe.init()
+      .then(() => {
+        if (!splashGlobe.supported) return;  // fallback image stays
+        splashCanvas.style.display = 'block';
+        if (splashFallback) splashFallback.style.display = 'none';
+        splashGlobe.start();
+        const splash = document.getElementById('splash');
+        if (splash) {
+          splash.addEventListener('animationend', e => {
+            if (e.animationName === 'splashOut') splashGlobe.dispose();
+          });
+        }
+      })
+      .catch(e => console.error('[EarthGlobe] splash init error:', e));
   }
 
   // ── Globo 3D — sección interactiva ────────────────────────────
@@ -936,38 +959,45 @@
   const glow           = document.getElementById('earthGlow');
 
   if (parallaxCanvas && parallaxWrap) {
+    const fallback = document.getElementById('earthParallaxFallback');
     const globe = new EarthGlobe(parallaxCanvas);
-    globe.init().then(() => {
-      if (!globe.supported) return;
+    globe.init()
+      .then(() => {
+        if (!globe.supported) return;  // fallback image stays visible
 
-      // Pausa el render cuando la sección no está visible
-      const observer = new IntersectionObserver(entries => {
-        entries.forEach(e => e.isIntersecting ? globe.start() : globe.stop());
-      }, { threshold: 0.1 });
-      observer.observe(parallaxWrap);
+        // Globe ready — swap fallback for canvas
+        parallaxCanvas.style.display = 'block';
+        if (fallback) fallback.style.display = 'none';
 
-      window.addEventListener('resize', () => globe.resize());
+        // Pausa el render cuando la sección no está visible
+        const observer = new IntersectionObserver(entries => {
+          entries.forEach(e => e.isIntersecting ? globe.start() : globe.stop());
+        }, { threshold: 0.1 });
+        observer.observe(parallaxWrap);
 
-      // Parallax con cursor: tilt 3D en lugar de CSS transform
-      let bounds = null;
-      parallaxWrap.addEventListener('mouseenter', () => {
-        bounds = parallaxWrap.getBoundingClientRect();
-        if (glow) glow.style.opacity = '1';
-      });
-      parallaxWrap.addEventListener('mouseleave', () => {
-        globe.resetParallax();
-        if (glow) glow.style.opacity = '0';
-      });
-      parallaxWrap.addEventListener('mousemove', e => {
-        if (!bounds) bounds = parallaxWrap.getBoundingClientRect();
-        const relX = (e.clientX - bounds.left)  / bounds.width  - 0.5;
-        const relY = (e.clientY - bounds.top)   / bounds.height - 0.5;
-        globe.setParallax(relX, relY);
-        if (glow) glow.style.background =
-          `radial-gradient(circle 250px at ${(relX+0.5)*100}% ${(relY+0.5)*100}%, rgba(255,255,255,0.10), transparent 70%)`;
-      });
-      window.addEventListener('resize', () => { bounds = null; });
-    });
+        window.addEventListener('resize', () => globe.resize());
+
+        // Parallax con cursor: tilt 3D en lugar de CSS transform
+        let bounds = null;
+        parallaxWrap.addEventListener('mouseenter', () => {
+          bounds = parallaxWrap.getBoundingClientRect();
+          if (glow) glow.style.opacity = '1';
+        });
+        parallaxWrap.addEventListener('mouseleave', () => {
+          globe.resetParallax();
+          if (glow) glow.style.opacity = '0';
+        });
+        parallaxWrap.addEventListener('mousemove', e => {
+          if (!bounds) bounds = parallaxWrap.getBoundingClientRect();
+          const relX = (e.clientX - bounds.left)  / bounds.width  - 0.5;
+          const relY = (e.clientY - bounds.top)   / bounds.height - 0.5;
+          globe.setParallax(relX, relY);
+          if (glow) glow.style.background =
+            `radial-gradient(circle 250px at ${(relX+0.5)*100}% ${(relY+0.5)*100}%, rgba(255,255,255,0.10), transparent 70%)`;
+        });
+        window.addEventListener('resize', () => { bounds = null; });
+      })
+      .catch(e => console.error('[EarthGlobe] parallax init error:', e));
   }
 </script>
 <script>
