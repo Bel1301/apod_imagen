@@ -3,6 +3,19 @@
 Todos los cambios notables de **Horizon** se documentan en este archivo.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.0.0/).
 
+## [2026-06-22] — Fix crítico de deploy (buscador + imagen)
+
+### Fixed
+- **¡Deploy roto!** `export const config = { maxDuration: 30 }` en `gallery.js`
+  excedía el límite de 10s del plan Hobby de Vercel → **todos los deploys fallaban**
+  desde ese commit. Por eso el buscador y la imagen "dejaron de andar" (la app
+  quedó congelada en una versión vieja). Se eliminó el `config` y el timeout
+  interno bajó a 9s (bajo el límite de la función).
+
+### Changed
+- Banda de la Tierra **más alta** (`clamp` hasta 640px en PC / 420px en móvil),
+  manteniendo el ancho full-bleed.
+
 ## [2026-06-22] — Imágenes transparentes y banda Tierra
 
 ### Added

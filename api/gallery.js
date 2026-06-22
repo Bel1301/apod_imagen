@@ -1,6 +1,3 @@
-// maxDuration alto por si NASA tarda en responder el rango de fechas
-export const config = { maxDuration: 30 };
-
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');
@@ -30,7 +27,7 @@ export default async function handler(req, res) {
     const url = `https://api.nasa.gov/planetary/apod?api_key=${NASA_KEY}`
       + `&start_date=${fmt(start)}&end_date=${fmt(end)}&thumbs=true`;
 
-    const r = await fetch(url, { signal: AbortSignal.timeout(15000) });
+    const r = await fetch(url, { signal: AbortSignal.timeout(9000) });
     const body = await r.json();
 
     if (r.status === 429) {
