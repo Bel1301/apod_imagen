@@ -159,6 +159,7 @@
   @media (max-width:900px){ .content{ grid-template-columns:1fr; } }
 
   .figure{
+    position:relative;
     border:1px solid var(--border);
     border-radius:14px;
     overflow:hidden;
@@ -170,6 +171,12 @@
     flex-direction:column;
   }
   .figure img{ width:100%; height:auto; display:block; }
+  .apodImg{ opacity:0; transition:opacity .4s ease; }
+  .apodImg.loaded{ opacity:1; }
+  .imgLoading{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    color:var(--muted); font-size:13px; pointer-events:none;
+  }
   .figure iframe, .figure video{
     width:100%; height:520px; border:0; display:block;
   }
@@ -184,7 +191,7 @@
     background:rgba(255,255,255,.04);
   }
   .copy p{
-    margin:0; color:var(--text); line-height:1.55; font-size:15px; white-space:pre-wrap;
+    margin:0; color:var(--text); line-height:1.6; font-size:clamp(15px,1.4vw,17px); white-space:pre-wrap;
   }
 
   .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
@@ -473,15 +480,15 @@
 
         <div style="width:56px; height:0.5px; background:rgba(200,149,106,.35);"></div>
 
-        <p style="margin:0; font-size:15px; color:var(--muted); line-height:1.75; max-width:520px;">
+        <p style="margin:0; font-size:clamp(15px,1.2vw,17px); color:var(--muted); line-height:1.75; max-width:520px;">
           Interface built on the NASA API.<br>
           Astronomical images and content belong to their respective authors.
         </p>
 
         <div style="display:flex; align-items:center; gap:20px; margin-top:4px;">
-          <span style="font-size:13px; color:var(--muted);">© 2026 Horizon · All rights reserved</span>
+          <span style="font-size:clamp(13px,1vw,15px); color:var(--muted);">© 2026 Horizon · All rights reserved</span>
           <span style="color:rgba(200,149,106,.3);">·</span>
-          <a href="https://apod.nasa.gov" target="_blank" rel="noopener noreferrer" style="font-size:13px; color:var(--cream); text-decoration:none; opacity:.85;">NASA APOD official</a>
+          <a href="https://apod.nasa.gov" target="_blank" rel="noopener noreferrer" style="font-size:clamp(13px,1vw,15px); color:var(--cream); text-decoration:none; opacity:.85;">NASA APOD official</a>
         </div>
 
       </div>
@@ -646,19 +653,28 @@
     const src = ORIGINAL.url;
 
     if (type === 'image') {
+      const loader = document.createElement('div');
+      loader.className = 'imgLoading';
+      loader.textContent = LANG === 'es' ? 'Cargando imagen…' : 'Loading image…';
+      mediaBox.appendChild(loader);
+
       const img = document.createElement('img');
-      // Preview en resolución estándar: la hdurl puede pesar varios MB y
-      // fallar en móvil (imagen rota). La hdurl queda en "Ver recurso".
+      img.className = 'apodImg';
       img.alt = ORIGINAL.title || '';
       img.loading = 'eager';
-      img.decoding = 'async';
       let triedHd = false;
+      img.onload = () => { loader.remove(); img.classList.add('loaded'); };
       img.onerror = () => {
-        // Fallback: si la url estándar falla, intentar hdurl una sola vez
         if (!triedHd && ORIGINAL.hdurl && ORIGINAL.hdurl !== ORIGINAL.url) {
           triedHd = true;
           img.src = ORIGINAL.hdurl;
+          return;
         }
+        loader.remove();
+        const msg = document.createElement('p');
+        msg.style = 'color:var(--muted);font-size:13px;padding:24px;text-align:center;';
+        msg.textContent = LANG === 'es' ? 'No se pudo cargar la imagen.' : 'Image could not be loaded.';
+        mediaBox.appendChild(msg);
       };
       img.src = ORIGINAL.url || ORIGINAL.hdurl;
       mediaBox.appendChild(img);
