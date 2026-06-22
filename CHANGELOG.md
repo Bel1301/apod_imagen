@@ -3,6 +3,20 @@
 Todos los cambios notables de **Horizon** se documentan en este archivo.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.0.0/).
 
+## [2026-06-21] — Ajustes finales
+
+### Changed
+- **Logo Horizon (H transparente)** forzado en favicon, footer y manifest con
+  `?v=3` para invalidar el cacheado del logo anterior.
+- **Botones**: recoloreados a **fondo crema** (`#efe5cf`) con **texto azul oscuro**
+  (`#16285c`), manteniendo las variantes Primary y Ghost/Text.
+- El wordmark **HORIZON** ahora usa **Space Grotesk** en todas sus apariciones
+  (splash, masthead y footer).
+- La **Tierra con parallax** pasa a ser **full-bleed** (punta a punta, ancho del
+  viewport, sin esquinas redondeadas); `overflow-x:hidden` en `body` evita scroll
+  horizontal.
+- Copyright del footer: `© 2026 MBP` → `© 2026 Horizon`.
+
 ## [2026-06-21]
 
 ### Added
