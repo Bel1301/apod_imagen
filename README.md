@@ -1,9 +1,10 @@
 # Horizon
 <img src="logo.png" alt="Horizon preview" width="200">
 
-**Daily views of the cosmos** — A reimagined interface for NASA's Astronomy Picture of the Day (APOD) API.
+**Newsletter** — A web app that centralizes data obtained from the NASA API, offering new features such as a manual search by date and topic of interest.
 
 Horizon transforms NASA's raw APOD API into a polished, bilingual, installable web app — built from scratch as a personal project to explore frontend design, security best practices, and serverless architecture.
+The application aims to facilitate the exploration of astronomical data for any user, sparking curiosity in the field.
 
 🔗 **Live app:** [apod-imagen.vercel.app](https://apod-imagen.vercel.app)
 
