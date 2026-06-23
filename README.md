@@ -1,5 +1,5 @@
-# Horizon
-<img src="logo.png" alt="Horizon preview" width="200">
+# Horizon <img src="logo.png" alt="Horizon preview" width="200">
+
 
 **Newsletter** — A web app that centralizes data obtained from the NASA API, offering new features such as a manual search by date and topic of interest.
 
