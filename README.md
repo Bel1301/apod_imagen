@@ -1,4 +1,5 @@
 # Horizon
+<img src="logo.png" alt="Horizon preview" width="800">
 
 **Daily views of the cosmos** — A reimagined interface for NASA's Astronomy Picture of the Day (APOD) API.
 
@@ -20,7 +21,7 @@ Horizon transforms NASA's raw APOD API into a polished, bilingual, installable w
 
 ## Preview
 
-![Horizon preview](logo.png)
+
 
 ---
 
