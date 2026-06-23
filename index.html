@@ -725,13 +725,7 @@
       ? (LANG === 'es' ? 'Ver video externo ▶️' : 'Open external video ▶️')
       : (LANG === 'es' ? 'Ver recurso' : 'View resource');
     resourceBtnEl.onclick = (e) => { e.preventDefault(); if (asset) openInNewTab(asset); };
-  document.getElementById('footerHelp').innerHTML = external ? `
-      <div class="note">
-        <span>🎬</span>
-        <span>${LANG==='es'
-          ? 'No podemos reproducir este video dentro de la página por restricciones del proveedor. Se abrirá en una nueva pestaña.'
-          : "We can't play this video inline due to provider restrictions. It will open in a new tab."}</span>
-      </div>` : '';
+  document.getElementById('footerHelp').innerHTML = '';
 
     let title = ORIGINAL.title || '—';
     let explanation = ORIGINAL.explanation || '';
@@ -784,7 +778,10 @@
     const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
     document.getElementById('d').value = date || today;
 
-    const cacheKey = date || 'latest';
+    // Clave de cache atada a la fecha de HOY (no un 'latest' fijo): así al
+    // cambiar de día se invalida sola y no muestra de entrada la respuesta
+    // cacheada de ayer mientras revalida en segundo plano.
+    const cacheKey = date || today;
     const apiUrl = new URL('/api/apod', window.location.origin);
     if (date) apiUrl.searchParams.set('date', date);
     const errBox = document.getElementById('err');
