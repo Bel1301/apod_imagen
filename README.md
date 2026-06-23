@@ -12,10 +12,10 @@ The application aims to facilitate the exploration of astronomical data for any 
 
 ## Features
 
-- **Daily astronomy picture** with full NASA APOD metadata (title, explanation, credit, date)
-- **Smart search** — search in Spanish ("luna", "marte", "nebulosa") and the app maps it to the right English term for the API
-- **Bilingual** — full ES/EN toggle with on-the-fly translation
-- **Installable PWA** — add to home screen on Android & iOS, works offline via Service Worker
+- **Data & Image** Full NASA APOD metadata (title, explanation, credit, date)
+- **Smart search** — Search by topic of interest (galaxy, moon, mars) for images from the last 30 days
+- **Bilingual** — Complete translation of the information in Spanish or English
+- **Installable PWA** — Add to home screen on Android & iOS, works offline via Service Worker
 
 ---
 
@@ -35,7 +35,7 @@ The application aims to facilitate the exploration of astronomical data for any 
 
 ---
 
-## 🔒 Security (OWASP-aligned)
+## 🔒 Security (OWASP)
 
 | Measure | Implementation |
 |---|---|
@@ -99,7 +99,7 @@ Searches APOD entries from the last 30 days by keyword.
 
 - [NASA APOD API](https://api.nasa.gov/) for the daily astronomy content
 - [Solar System Scope](https://www.solarsystemscope.com/textures/) for Earth textures (CC BY 4.0)
-
+This project uses the public NASA APOD API. Astronomical images and content belong to their respective authors.
 ---
 
 ## 📬 Contact
@@ -108,7 +108,3 @@ Searches APOD entries from the last 30 days by keyword.
 [LinkedIn](https://www.linkedin.com/in/mar%C3%ADa-bel%C3%A9n-pe%C3%B1a/)
 
 ---
-
-## 📄 License
-
-This project uses the public NASA APOD API. Astronomical images and content belong to their respective authors. Code in this repository is shared for educational and portfolio purposes.
