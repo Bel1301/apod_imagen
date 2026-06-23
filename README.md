@@ -8,18 +8,17 @@ Horizon transforms NASA's raw APOD API into a polished, bilingual, installable w
 
 ---
 
-## ✨ Features
+## Features
 
-- 🌌 **Daily astronomy picture** with full NASA APOD metadata (title, explanation, credit, date)
-- 🔭 **Smart search** — search in Spanish ("luna", "marte", "nebulosa") and the app maps it to the right English term for the API
-- 🌍 **Bilingual** — full ES/EN toggle with on-the-fly translation
-- 📱 **Installable PWA** — add to home screen on Android & iOS, works offline via Service Worker
-- 🎨 **Custom dark-horizon design system** — starry sky gradient, Earth parallax, Space Grotesk typography
-- 🛰️ Built entirely with **vanilla JS** — no frontend framework, no build step
+- **Daily astronomy picture** with full NASA APOD metadata (title, explanation, credit, date)
+- **Smart search** — search in Spanish ("luna", "marte", "nebulosa") and the app maps it to the right English term for the API
+- **Bilingual** — full ES/EN toggle with on-the-fly translation
+- **Installable PWA** — add to home screen on Android & iOS, works offline via Service Worker
+
 
 ---
 
-## 🖼️ Preview
+## Preview
 
 ![Horizon preview](logo.png)
 
@@ -55,49 +54,6 @@ Horizon transforms NASA's raw APOD API into a polished, bilingual, installable w
 | Information disclosure | API errors never leak `e.message`; generic client errors + server-side logging |
 | Safe external links | `rel="noopener noreferrer"` on all `target="_blank"` links |
 | HTTP method | `GET` only; all other methods return `405` |
-
----
-
-## 🚀 Quick start guide
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/Bel1301/apod_imagen.git
-cd apod_imagen
-```
-
-### 2. Configure environment variables
-
-```bash
-# In Vercel → Settings → Environment Variables, add:
-NASA_API_KEY=your_nasa_api_key_here
-```
-
-Get a free key at [api.nasa.gov](https://api.nasa.gov) (no key needed for local testing — defaults to `DEMO_KEY`, rate-limited).
-
-### 3. Run locally
-
-This project has no build step — it's plain HTML/CSS/JS served as static files, plus two serverless functions.
-
-```bash
-# Install Vercel CLI if you don't have it
-npm install -g vercel
-
-# Run the local dev server (serves index.html + /api functions)
-vercel dev
-```
-
-### 4. Deploy
-
-```bash
-# Push to main — Vercel auto-deploys
-git add .
-git commit -m "your message"
-git push
-```
-
-Or connect the repo directly in [vercel.com](https://vercel.com) for automatic CI/CD on every push.
 
 ---
 
