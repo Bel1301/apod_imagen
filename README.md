@@ -16,13 +16,6 @@ Horizon transforms NASA's raw APOD API into a polished, bilingual, installable w
 - **Bilingual** — full ES/EN toggle with on-the-fly translation
 - **Installable PWA** — add to home screen on Android & iOS, works offline via Service Worker
 
-
----
-
-## Preview
-
-
-
 ---
 
 ## 🛠️ Tech stack
@@ -35,7 +28,6 @@ Horizon transforms NASA's raw APOD API into a polished, bilingual, installable w
 | Animation | CSS keyframes + parallax (mouse events) | Splash screen, interactive Earth |
 | Backend | Vercel Serverless Functions (Node.js 24, ES Modules) | `api/apod.js`, `api/gallery.js` |
 | Data source | [NASA APOD API](https://api.nasa.gov/) | Daily image + date-range search |
-| Translation | Google Translate (unofficial) | ES translation of titles/descriptions |
 | PWA | `manifest.json` + Service Worker | Installable, offline-first cache |
 | Performance | Client-side cache (`localStorage`, stale-while-revalidate) | Instant render, no waiting on the API |
 | Hosting / CI | Vercel + GitHub | Auto-deploy on every push |
@@ -93,12 +85,19 @@ Searches APOD entries from the last 30 days by keyword.
 | `limit` | number (optional, max 40) | Max results to return |
 
 ---
+## Backend serverless (/api/)
 
-## 🙏 Acknowledgments
+| File | Function |
+|---|---|
+| api/apod.js | Image of the day — calls NASA APOD, parses JSON, returns normalized data with fallback to yesterday if today fails |
+| api/gallery.js | Search engine — query NASA APOD by date range and filter by keyword; use start_date/end_date (no count, which exceeds the timeout) |
+| api/home.js | Health/home auxiliary endpoint |
+| api/vercel.json | Config for internal paths of the /api/ folder |
+
+## Fonts
 
 - [NASA APOD API](https://api.nasa.gov/) for the daily astronomy content
 - [Solar System Scope](https://www.solarsystemscope.com/textures/) for Earth textures (CC BY 4.0)
-- Built as a personal learning project to explore secure, framework-free frontend architecture
 
 ---
 
