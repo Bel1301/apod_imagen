@@ -604,12 +604,18 @@
     }
   }
 
+  const USER_NAV_FLAG = 'apod_userNav';
+
   function go(){
     const d = document.getElementById('d').value;
     const u = new URL(window.location.href);
     if (d) u.searchParams.set('date', d);
     else u.searchParams.delete('date');
     u.searchParams.set('t', Date.now().toString());
+    // Marca que la próxima carga viene de una elección del usuario en esta
+    // misma sesión, para que getDateFromUrl() no la confunda con una
+    // apertura fresca de la app anclada.
+    sessionStorage.setItem(USER_NAV_FLAG, '1');
     window.location.href = u.toString();
   }
 
@@ -619,12 +625,15 @@
   }
 
   function getDateFromUrl(){
-    // App anclada (Windows/Android/iOS): el ícono guarda la URL exacta del
-    // momento en que se ancló, con la última fecha elegida pegada en el
-    // query string. Si no se ignora, la app abre siempre en ese día viejo
-    // en vez de hoy. En una pestaña normal del navegador sí se respeta el
-    // parámetro, para poder compartir o enlazar un día puntual.
-    if (isStandaloneApp()) return '';
+    // App anclada (Windows/Android/iOS): el ícono puede reabrir la última
+    // URL que quedó activa, con una fecha vieja pegada en el query string.
+    // Eso solo pasa cuando el sistema recrea la sesión desde cero (sessionStorage
+    // vacío); si el usuario eligió una fecha y tocó "Ver" dentro de la sesión
+    // actual, sí queremos respetar esa elección. En una pestaña normal del
+    // navegador siempre se respeta el parámetro, para compartir o enlazar un día puntual.
+    if (isStandaloneApp() && !sessionStorage.getItem(USER_NAV_FLAG)){
+      return '';
+    }
     return new URL(window.location.href).searchParams.get('date') || '';
   }
 
